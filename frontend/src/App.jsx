@@ -1,11 +1,11 @@
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ChevronLeft, MessageCircle, ShoppingCart } from "lucide-react";
 
 import "./App.css";
 
 import { categories, tabs } from "./data/categories";
 import { offers } from "./data/offers";
-import { products } from "./data/products";
+import { products as initialProducts } from "./data/products";
 
 import { useAutoHorizontalScroll } from "./hooks/useAutoHorizontalScroll";
 
@@ -18,8 +18,12 @@ import ProductCard from "./components/ProductCard";
 import BottomNav from "./components/BottomNav";
 import DrawerMenu from "./components/DrawerMenu";
 import EmptyState from "./components/EmptyState";
+import AdminDashboard from "./pages/AdminDashboard";
 
 function App() {
+  const [currentPath, setCurrentPath] = useState(() => window.location.pathname);
+
+  const [productList, setProductList] = useState(initialProducts);
   const [activeTab, setActiveTab] = useState(tabs[0]);
   const [activeCategory, setActiveCategory] = useState("الكل");
   const [activeNav, setActiveNav] = useState("store");
@@ -33,8 +37,30 @@ function App() {
   const bestSellerRowRef = useRef(null);
   const searchInputRef = useRef(null);
 
+  useEffect(() => {
+    const handlePopState = () => {
+      setCurrentPath(window.location.pathname);
+    };
+
+    window.addEventListener("popstate", handlePopState);
+
+    return () => {
+      window.removeEventListener("popstate", handlePopState);
+    };
+  }, []);
+
+  const navigateToPath = (path) => {
+    window.history.pushState(null, "", path);
+    setCurrentPath(path);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const categoryOptions = useMemo(() => {
+    return categories.filter((category) => category !== "الكل");
+  }, []);
+
   const filteredProducts = useMemo(() => {
-    return products.filter((product) => {
+    return productList.filter((product) => {
       const matchesCategory =
         activeCategory === "الكل" || product.category === activeCategory;
 
@@ -48,7 +74,7 @@ function App() {
 
       return matchesCategory && matchesSearch;
     });
-  }, [activeCategory, searchQuery]);
+  }, [activeCategory, searchQuery, productList]);
 
   const newProducts = useMemo(() => {
     const list = filteredProducts.filter((product) => product.is_new);
@@ -56,9 +82,9 @@ function App() {
   }, [filteredProducts]);
 
   const bestSellerProducts = useMemo(() => {
-    const list = products.filter((product) => product.is_best_seller);
-    return list.length ? list : products;
-  }, []);
+    const list = productList.filter((product) => product.is_best_seller);
+    return list.length ? list : productList;
+  }, [productList]);
 
   const autoScrollOffers = useMemo(() => {
     return [...offers, ...offers];
@@ -121,6 +147,17 @@ function App() {
     setActiveCategory("الكل");
     setSearchQuery("");
   };
+
+  if (currentPath.startsWith("/admin")) {
+    return (
+      <AdminDashboard
+        products={productList}
+        setProducts={setProductList}
+        categoryOptions={categoryOptions}
+        onBackToApp={() => navigateToPath("/")}
+      />
+    );
+  }
 
   return (
     <div className="app" dir="rtl">
@@ -247,12 +284,12 @@ function App() {
 
       <BottomNav activeNav={activeNav} onNavigate={handleNavClick} />
 
-      {drawerOpen && (
-        <DrawerMenu
-          onClose={() => setDrawerOpen(false)}
-          onNavigate={handleNavClick}
-        />
-      )}
+     {drawerOpen && (
+  <DrawerMenu
+    onClose={() => setDrawerOpen(false)}
+    onNavigate={handleNavClick}
+  />
+)}  
     </div>
   );
 }

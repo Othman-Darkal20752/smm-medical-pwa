@@ -4,7 +4,6 @@ import {
   MessageCircle,
   Percent,
   Store,
-  User,
   X,
 } from "lucide-react";
 
@@ -63,18 +62,6 @@ function DrawerMenu({ onClose, onNavigate }) {
         >
           <Bell size={25} />
           جديدنا
-          <ChevronLeft size={20} />
-        </a>
-
-        <a
-          href="#account"
-          onClick={(event) => {
-            event.preventDefault();
-            onClose();
-          }}
-        >
-          <User size={25} />
-          الحساب
           <ChevronLeft size={20} />
         </a>
 

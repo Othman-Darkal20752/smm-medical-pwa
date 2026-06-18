@@ -38,6 +38,7 @@ function AppHeader({
 
       <div className="search-box">
         <Search size={20} />
+
         <input
           ref={searchInputRef}
           value={searchQuery}
