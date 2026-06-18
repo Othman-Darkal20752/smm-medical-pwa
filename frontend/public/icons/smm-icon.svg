@@ -1,0 +1,6 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <rect width="512" height="512" rx="112" fill="#d90416"></rect>
+  <circle cx="256" cy="256" r="176" fill="#ffffff" opacity="0.96"></circle>
+  <path d="M142 264h62l28-72 50 136 34-64h54" fill="none" stroke="#d90416" stroke-width="28" stroke-linecap="round" stroke-linejoin="round"></path>
+  <text x="256" y="398" text-anchor="middle" font-family="Arial, sans-serif" font-size="82" font-weight="800" fill="#071a33">SMM</text>
+</svg>

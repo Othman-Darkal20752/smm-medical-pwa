@@ -1,0 +1,22 @@
+{
+  "name": "Sahnaya Medical Mall",
+  "short_name": "SMM",
+  "description": "كتالوج طبي ذكي لمنتجات مول صحنايا الطبي",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "dir": "rtl",
+  "lang": "ar",
+  "theme_color": "#d90416",
+  "background_color": "#ffffff",
+  "categories": ["medical", "shopping", "health"],
+  "icons": [
+    {
+      "src": "/icons/smm-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
