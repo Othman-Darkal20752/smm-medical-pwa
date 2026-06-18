@@ -18,6 +18,8 @@ import ProductCard from "./components/ProductCard";
 import BottomNav from "./components/BottomNav";
 import DrawerMenu from "./components/DrawerMenu";
 import EmptyState from "./components/EmptyState";
+import InstallPrompt from "./components/InstallPrompt";
+
 import AdminDashboard from "./pages/AdminDashboard";
 
 function App() {
@@ -184,7 +186,7 @@ function App() {
         <section className="section-block" id="offers-section">
           <div className="section-title">
             <h2>عروضنا</h2>
-            <button onClick={() => setActiveTab("العروض")}>
+            <button type="button" onClick={() => setActiveTab("العروض")}>
               مشاهدة الكل
               <ChevronLeft size={19} />
             </button>
@@ -200,7 +202,7 @@ function App() {
         <section className="section-block" id="store-section">
           <div className="section-title">
             <h2>جديدنا</h2>
-            <button onClick={resetFilters}>
+            <button type="button" onClick={resetFilters}>
               مشاهدة الكل
               <ChevronLeft size={19} />
             </button>
@@ -226,7 +228,7 @@ function App() {
         <section className="section-block" id="best-section">
           <div className="section-title">
             <h2>الأكثر مبيعاً</h2>
-            <button onClick={resetFilters}>
+            <button type="button" onClick={resetFilters}>
               مشاهدة الكل
               <ChevronLeft size={19} />
             </button>
@@ -248,7 +250,7 @@ function App() {
         <section className="section-block" id="cart-section">
           <div className="section-title">
             <h2>السلة</h2>
-            <button onClick={() => setCartCount(0)}>
+            <button type="button" onClick={() => setCartCount(0)}>
               تفريغ السلة
               <ChevronLeft size={19} />
             </button>
@@ -266,7 +268,7 @@ function App() {
         <section className="section-block" id="contact-section">
           <div className="section-title">
             <h2>تواصل معنا</h2>
-            <button>
+            <button type="button">
               واتساب
               <ChevronLeft size={19} />
             </button>
@@ -284,12 +286,14 @@ function App() {
 
       <BottomNav activeNav={activeNav} onNavigate={handleNavClick} />
 
-     {drawerOpen && (
-  <DrawerMenu
-    onClose={() => setDrawerOpen(false)}
-    onNavigate={handleNavClick}
-  />
-)}  
+      {drawerOpen && (
+        <DrawerMenu
+          onClose={() => setDrawerOpen(false)}
+          onNavigate={handleNavClick}
+        />
+      )}
+
+      <InstallPrompt />
     </div>
   );
 }
