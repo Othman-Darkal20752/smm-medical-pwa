@@ -1,197 +1,23 @@
-import { useEffect, useMemo, useRef, useState } from "react";
-import {
-  Bell,
-  ChevronLeft,
-  Heart,
-  Home,
-  Menu,
-  MessageCircle,
-  Package,
-  Percent,
-  Search,
-  ShoppingCart,
-  Stethoscope,
-  Store,
-  User,
-  X,
-} from "lucide-react";
+import { useMemo, useRef, useState } from "react";
+import { ChevronLeft, MessageCircle, ShoppingCart } from "lucide-react";
+
 import "./App.css";
 
-const categories = [
-  "الكل",
-  "أجهزة الضغط",
-  "أجهزة السكر",
-  "مستهلكات طبية",
-  "مستلزمات مشافي",
-  "تعقيم",
-  "عناية",
-];
+import { categories, tabs } from "./data/categories";
+import { offers } from "./data/offers";
+import { products } from "./data/products";
 
-const tabs = ["المنتجات الطبية", "المستلزمات", "العروض"];
+import { useAutoHorizontalScroll } from "./hooks/useAutoHorizontalScroll";
 
-const products = [
-  {
-    id: 1,
-    name: "جهاز قياس ضغط رقمي",
-    category: "أجهزة الضغط",
-    price: "285,000 ل.س",
-    tag: "الأكثر مبيعاً",
-    tone: "blue",
-    isNew: false,
-    isOffer: false,
-    isBestSeller: true,
-  },
-  {
-    id: 2,
-    name: "جهاز قياس سكر مع الشرائح",
-    category: "أجهزة السكر",
-    price: "190,000 ل.س",
-    tag: "جديد",
-    tone: "red",
-    isNew: true,
-    isOffer: false,
-    isBestSeller: true,
-  },
-  {
-    id: 3,
-    name: "كمامات طبية 50 قطعة",
-    category: "مستهلكات طبية",
-    price: "42,000 ل.س",
-    tag: "عرض",
-    tone: "cyan",
-    isNew: false,
-    isOffer: true,
-    isBestSeller: false,
-  },
-  {
-    id: 4,
-    name: "معقم أسطح طبي",
-    category: "تعقيم",
-    price: "65,000 ل.س",
-    tag: "متوفر",
-    tone: "navy",
-    isNew: false,
-    isOffer: false,
-    isBestSeller: true,
-  },
-  {
-    id: 5,
-    name: "قفازات طبية لاتكس",
-    category: "مستهلكات طبية",
-    price: "55,000 ل.س",
-    tag: "جديد",
-    tone: "blue",
-    isNew: true,
-    isOffer: false,
-    isBestSeller: false,
-  },
-  {
-    id: 6,
-    name: "جهاز مساج علاجي",
-    category: "عناية",
-    price: "410,000 ل.س",
-    tag: "متوفر",
-    tone: "red",
-    isNew: false,
-    isOffer: false,
-    isBestSeller: true,
-  },
-];
-
-const offers = [
-  {
-    id: 1,
-    name: "عرض خاص على أجهزة قياس الضغط",
-    price: "خصم 15%",
-    desc: "لفترة محدودة على أجهزة الضغط الرقمية.",
-  },
-  {
-    id: 2,
-    name: "باقة مستهلكات طبية للعيادات",
-    price: "وفر أكثر",
-    desc: "كمامات، قفازات، ومعقمات ضمن باقة واحدة.",
-  },
-  {
-    id: 3,
-    name: "تجهيزات مشافي مختارة",
-    price: "حسب الطلب",
-    desc: "منتجات مختارة للمراكز والعيادات الطبية.",
-  },
-  {
-    id: 4,
-    name: "عروض التعقيم والعناية",
-    price: "وفر 10%",
-    desc: "مختارات من المعقمات ومستلزمات العناية الطبية.",
-  },
-];
-
-const navItems = [
-  { id: "home", label: "الرئيسية", icon: Home },
-  { id: "store", label: "المتجر", icon: Store },
-  { id: "offers", label: "العروض", icon: Percent },
-  { id: "cart", label: "السلة", icon: ShoppingCart },
-  { id: "contact", label: "تواصل", icon: MessageCircle },
-];
-
-function useAutoHorizontalScroll(ref, enabled = true, resetKey = "") {
-  useEffect(() => {
-    const el = ref.current;
-    if (!el || !enabled) return;
-
-    let frameId;
-    let paused = false;
-    let position = 0;
-
-    // السرعة الهادئة المناسبة
-    const speed = 0.24;
-
-    el.scrollLeft = 0;
-
-    const step = () => {
-      if (!paused && el.scrollWidth > el.clientWidth) {
-        const loopPoint = el.scrollWidth / 2;
-
-        position += speed;
-
-        if (position >= loopPoint - 2) {
-          position = 0;
-          el.scrollLeft = 0;
-        } else {
-          el.scrollLeft = position;
-        }
-      }
-
-      frameId = requestAnimationFrame(step);
-    };
-
-    const pause = () => {
-      paused = true;
-      position = el.scrollLeft;
-    };
-
-    const resume = () => {
-      window.setTimeout(() => {
-        position = el.scrollLeft;
-        paused = false;
-      }, 700);
-    };
-
-    el.addEventListener("touchstart", pause, { passive: true });
-    el.addEventListener("touchend", resume);
-    el.addEventListener("pointerdown", pause);
-    el.addEventListener("pointerup", resume);
-
-    frameId = requestAnimationFrame(step);
-
-    return () => {
-      cancelAnimationFrame(frameId);
-      el.removeEventListener("touchstart", pause);
-      el.removeEventListener("touchend", resume);
-      el.removeEventListener("pointerdown", pause);
-      el.removeEventListener("pointerup", resume);
-    };
-  }, [ref, enabled, resetKey]);
-}
+import AppHeader from "./components/AppHeader";
+import AppTabs from "./components/AppTabs";
+import HomeHero from "./components/HomeHero";
+import CategoryStrip from "./components/CategoryStrip";
+import OfferCard from "./components/OfferCard";
+import ProductCard from "./components/ProductCard";
+import BottomNav from "./components/BottomNav";
+import DrawerMenu from "./components/DrawerMenu";
+import EmptyState from "./components/EmptyState";
 
 function App() {
   const [activeTab, setActiveTab] = useState(tabs[0]);
@@ -225,12 +51,12 @@ function App() {
   }, [activeCategory, searchQuery]);
 
   const newProducts = useMemo(() => {
-    const list = filteredProducts.filter((product) => product.isNew);
+    const list = filteredProducts.filter((product) => product.is_new);
     return list.length ? list : filteredProducts;
   }, [filteredProducts]);
 
   const bestSellerProducts = useMemo(() => {
-    const list = products.filter((product) => product.isBestSeller);
+    const list = products.filter((product) => product.is_best_seller);
     return list.length ? list : products;
   }, []);
 
@@ -248,15 +74,22 @@ function App() {
   }, [bestSellerProducts]);
 
   useAutoHorizontalScroll(offerRowRef, autoScrollOffers.length > 3, "offers");
+
   useAutoHorizontalScroll(
     productRowRef,
     autoScrollProducts.length > 3,
     `${activeCategory}-${searchQuery}-${autoScrollProducts.length}`
   );
-  useAutoHorizontalScroll(bestSellerRowRef, autoScrollBestSellers.length > 3, "best-sellers");
+
+  useAutoHorizontalScroll(
+    bestSellerRowRef,
+    autoScrollBestSellers.length > 3,
+    "best-sellers"
+  );
 
   const scrollToSection = (id) => {
     const target = document.getElementById(id);
+
     if (target) {
       target.scrollIntoView({ behavior: "smooth", block: "start" });
     }
@@ -291,88 +124,25 @@ function App() {
 
   return (
     <div className="app" dir="rtl">
-      <header className="top-bar">
-        <div className="top-actions">
-          <button
-            className="icon-button"
-            aria-label="القائمة"
-            onClick={() => setDrawerOpen(true)}
-          >
-            <Menu size={30} />
-          </button>
-
-          <div className="brand-mark">
-            <span>SMM</span>
-            <small>مول صحنايا الطبي</small>
-          </div>
-
-          <div className="header-icons">
-            <button
-              className="icon-button"
-              aria-label="بحث"
-              onClick={() => searchInputRef.current?.focus()}
-            >
-              <Search size={29} />
-            </button>
-
-            <button
-              className="icon-button cart-icon"
-              aria-label="السلة"
-              onClick={() => handleNavClick("cart")}
-            >
-              <ShoppingCart size={29} />
-              <b>{cartCount}</b>
-            </button>
-          </div>
-        </div>
-
-        <div className="search-box">
-          <Search size={20} />
-          <input
-            ref={searchInputRef}
-            value={searchQuery}
-            onChange={(event) => setSearchQuery(event.target.value)}
-            placeholder="ابحث عن منتج طبي..."
-          />
-        </div>
-      </header>
+      <AppHeader
+        cartCount={cartCount}
+        searchQuery={searchQuery}
+        searchInputRef={searchInputRef}
+        onSearchChange={setSearchQuery}
+        onOpenDrawer={() => setDrawerOpen(true)}
+        onCartClick={() => handleNavClick("cart")}
+      />
 
       <main className="content">
-        <section className="tabs">
-          {tabs.map((tab) => (
-            <button
-              key={tab}
-              className={activeTab === tab ? "active" : ""}
-              onClick={() => setActiveTab(tab)}
-            >
-              {tab}
-            </button>
-          ))}
-        </section>
+        <AppTabs tabs={tabs} activeTab={activeTab} onChange={setActiveTab} />
 
-        <section className="hero-card" id="home-section">
-          <div>
-            <span className="eyebrow">كتالوج طبي ذكي</span>
-            <h1>كل مستلزماتك الطبية في مكان واحد</h1>
-            <p>تصفح الأجهزة والمستهلكات والعروض، وأرسل طلبك مباشرة عبر واتساب.</p>
-          </div>
+        <HomeHero />
 
-          <div className="hero-icon">
-            <Stethoscope size={58} />
-          </div>
-        </section>
-
-        <section className="category-strip">
-          {categories.map((category) => (
-            <button
-              key={category}
-              className={activeCategory === category ? "active" : ""}
-              onClick={() => setActiveCategory(category)}
-            >
-              {category}
-            </button>
-          ))}
-        </section>
+        <CategoryStrip
+          categories={categories}
+          activeCategory={activeCategory}
+          onChange={setActiveCategory}
+        />
 
         <section className="section-block" id="offers-section">
           <div className="section-title">
@@ -385,17 +155,7 @@ function App() {
 
           <div className="offer-row auto-scroll-row" ref={offerRowRef}>
             {autoScrollOffers.map((offer, index) => (
-              <article className="offer-card" key={`${offer.id}-${index}`}>
-                <div className="offer-visual">
-                  <Percent size={42} />
-                </div>
-
-                <div>
-                  <h3>{offer.name}</h3>
-                  <p>{offer.desc}</p>
-                  <strong>{offer.price}</strong>
-                </div>
-              </article>
+              <OfferCard offer={offer} key={`${offer.id}-${index}`} />
             ))}
           </div>
         </section>
@@ -412,39 +172,17 @@ function App() {
           {autoScrollProducts.length > 0 ? (
             <div className="product-row auto-scroll-row" ref={productRowRef}>
               {autoScrollProducts.map((product, index) => (
-                <article className="product-card" key={`${product.id}-${index}`}>
-                  <span className={`badge ${product.tone}`}>{product.tag}</span>
-
-                  <div className={`product-visual ${product.tone}`}>
-                    <Package size={54} />
-                  </div>
-
-                  <h3>{product.name}</h3>
-                  <p>{product.category}</p>
-                  <strong>{product.price}</strong>
-
-                  <div className="product-actions">
-                    <button aria-label="إضافة للسلة" onClick={handleAddToCart}>
-                      <ShoppingCart size={24} />
-                    </button>
-
-                    <button
-                      aria-label="المفضلة"
-                      className={favoriteIds.includes(product.id) ? "is-favorite" : ""}
-                      onClick={() => toggleFavorite(product.id)}
-                    >
-                      <Heart size={24} />
-                    </button>
-                  </div>
-                </article>
+                <ProductCard
+                  product={product}
+                  key={`${product.id}-${index}`}
+                  isFavorite={favoriteIds.includes(product.id)}
+                  onAddToCart={handleAddToCart}
+                  onToggleFavorite={toggleFavorite}
+                />
               ))}
             </div>
           ) : (
-            <div className="empty-state">
-              <h3>لا توجد منتجات مطابقة</h3>
-              <p>جرّب البحث باسم آخر أو اختر تصنيفاً مختلفاً.</p>
-              <button onClick={resetFilters}>إظهار كل المنتجات</button>
-            </div>
+            <EmptyState onReset={resetFilters} />
           )}
         </section>
 
@@ -459,31 +197,13 @@ function App() {
 
           <div className="product-row auto-scroll-row" ref={bestSellerRowRef}>
             {autoScrollBestSellers.map((product, index) => (
-              <article className="product-card" key={`best-${product.id}-${index}`}>
-                <span className={`badge ${product.tone}`}>{product.tag}</span>
-
-                <div className={`product-visual ${product.tone}`}>
-                  <Package size={54} />
-                </div>
-
-                <h3>{product.name}</h3>
-                <p>{product.category}</p>
-                <strong>{product.price}</strong>
-
-                <div className="product-actions">
-                  <button aria-label="إضافة للسلة" onClick={handleAddToCart}>
-                    <ShoppingCart size={24} />
-                  </button>
-
-                  <button
-                    aria-label="المفضلة"
-                    className={favoriteIds.includes(product.id) ? "is-favorite" : ""}
-                    onClick={() => toggleFavorite(product.id)}
-                  >
-                    <Heart size={24} />
-                  </button>
-                </div>
-              </article>
+              <ProductCard
+                product={product}
+                key={`best-${product.id}-${index}`}
+                isFavorite={favoriteIds.includes(product.id)}
+                onAddToCart={handleAddToCart}
+                onToggleFavorite={toggleFavorite}
+              />
             ))}
           </div>
         </section>
@@ -525,108 +245,13 @@ function App() {
         </section>
       </main>
 
-      <nav className="bottom-nav">
-        {navItems.map((item) => {
-          const Icon = item.icon;
-
-          return (
-            <button
-              key={item.id}
-              className={activeNav === item.id ? "active" : ""}
-              onClick={() => handleNavClick(item.id)}
-            >
-              <Icon size={25} />
-              <span>{item.label}</span>
-            </button>
-          );
-        })}
-      </nav>
+      <BottomNav activeNav={activeNav} onNavigate={handleNavClick} />
 
       {drawerOpen && (
-        <div className="drawer-layer">
-          <button
-            className="drawer-backdrop"
-            onClick={() => setDrawerOpen(false)}
-            aria-label="إغلاق"
-          />
-
-          <aside className="drawer">
-            <div className="drawer-head">
-              <button onClick={() => setDrawerOpen(false)} aria-label="إغلاق">
-                <X size={24} />
-              </button>
-
-              <div>
-                <h2>Sahnaya Medical Mall</h2>
-                <p>مول صحنايا الطبي</p>
-              </div>
-            </div>
-
-            <a
-              href="#store"
-              onClick={(event) => {
-                event.preventDefault();
-                setDrawerOpen(false);
-                handleNavClick("store");
-              }}
-            >
-              <Store size={25} />
-              المتجر
-              <ChevronLeft size={20} />
-            </a>
-
-            <a
-              href="#offers"
-              onClick={(event) => {
-                event.preventDefault();
-                setDrawerOpen(false);
-                handleNavClick("offers");
-              }}
-            >
-              <Percent size={25} />
-              العروض
-              <ChevronLeft size={20} />
-            </a>
-
-            <a
-              href="#new"
-              onClick={(event) => {
-                event.preventDefault();
-                setDrawerOpen(false);
-                handleNavClick("store");
-              }}
-            >
-              <Bell size={25} />
-              جديدنا
-              <ChevronLeft size={20} />
-            </a>
-
-            <a
-              href="#account"
-              onClick={(event) => {
-                event.preventDefault();
-                setDrawerOpen(false);
-              }}
-            >
-              <User size={25} />
-              الحساب
-              <ChevronLeft size={20} />
-            </a>
-
-            <a
-              href="#contact"
-              onClick={(event) => {
-                event.preventDefault();
-                setDrawerOpen(false);
-                handleNavClick("contact");
-              }}
-            >
-              <MessageCircle size={25} />
-              تواصل معنا
-              <ChevronLeft size={20} />
-            </a>
-          </aside>
-        </div>
+        <DrawerMenu
+          onClose={() => setDrawerOpen(false)}
+          onNavigate={handleNavClick}
+        />
       )}
     </div>
   );
