@@ -30,11 +30,29 @@ import InstallPrompt from "./components/InstallPrompt";
 
 import AdminDashboard from "./pages/AdminDashboard";
 
+const CART_STORAGE_KEY = "smm_medical_cart";
+const SHAM_CASH_QR_SRC = "/payments/sham-cash-qr.png";
+
 const paymentMethods = [
-  "نقداً عند الاستلام",
-  "شام كاش",
-  "اتفاق عبر واتساب",
+  {
+    id: "cash",
+    label: "نقداً عند الاستلام",
+    description: "الدفع عند استلام الطلب بعد تأكيد التوفر والسعر النهائي.",
+  },
+  {
+    id: "sham_cash",
+    label: "شام كاش",
+    description: "امسح رمز QR، ثم أرسل صورة الإشعار مع الطلب عبر واتساب.",
+    qr: SHAM_CASH_QR_SRC,
+  },
+  {
+    id: "whatsapp",
+    label: "اتفاق عبر واتساب",
+    description: "اتفق مع المتجر على طريقة الدفع المناسبة قبل تأكيد الطلب.",
+  },
 ];
+
+const DEFAULT_PAYMENT_METHOD = paymentMethods[0].id;
 
 const getProductsPageSize = () => {
   return window.matchMedia("(min-width: 900px)").matches ? 20 : 8;
@@ -64,6 +82,25 @@ function formatPrice(value) {
   return `${value.toLocaleString("en-US")} ل.س`;
 }
 
+function readStoredCartItems() {
+  try {
+    const storedCart = JSON.parse(localStorage.getItem(CART_STORAGE_KEY) || "[]");
+
+    if (!Array.isArray(storedCart)) {
+      return [];
+    }
+
+    return storedCart
+      .map((item) => ({
+        productId: item.productId,
+        quantity: Number(item.quantity) || 0,
+      }))
+      .filter((item) => item.productId && item.quantity > 0);
+  } catch {
+    return [];
+  }
+}
+
 function isStandaloneMode() {
   return (
     window.matchMedia("(display-mode: standalone)").matches ||
@@ -87,8 +124,8 @@ function App() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [favoriteIds, setFavoriteIds] = useState([]);
-  const [cartItems, setCartItems] = useState([]);
-  const [paymentMethod, setPaymentMethod] = useState(paymentMethods[0]);
+  const [cartItems, setCartItems] = useState(() => readStoredCartItems());
+  const [paymentMethod, setPaymentMethod] = useState(DEFAULT_PAYMENT_METHOD);
   const [visibleProductCount, setVisibleProductCount] = useState(() =>
     getProductsPageSize()
   );
@@ -173,6 +210,10 @@ function App() {
       }
     };
   }, []);
+
+  useEffect(() => {
+    localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cartItems));
+  }, [cartItems]);
 
   useEffect(() => {
     if (activePage === "products") {
@@ -298,6 +339,12 @@ function App() {
 
   const hasUnpricedItems = cartProducts.some((item) => item.priceValue === null);
 
+  const selectedPaymentMethod =
+    paymentMethods.find((method) => method.id === paymentMethod) ||
+    paymentMethods[0];
+
+  const isShamCashSelected = selectedPaymentMethod.id === "sham_cash";
+
   const cartWhatsappUrl = useMemo(() => {
     const orderLines = cartProducts
       .map((item, index) => {
@@ -324,14 +371,18 @@ function App() {
 ${orderLines}
 
 ${totalLine}
-طريقة الدفع: ${paymentMethod}
+طريقة الدفع: ${selectedPaymentMethod.label}${
+      selectedPaymentMethod.id === "sham_cash"
+        ? "\nملاحظة: تم اختيار الدفع عبر شام كاش، وسيتم إرسال إشعار التحويل بعد تأكيد الطلب."
+        : ""
+    }
 
 الرجاء تأكيد التوفر والسعر النهائي.`;
 
     return `https://wa.me/${storeInfo.whatsappRaw}?text=${encodeURIComponent(
       message
     )}`;
-  }, [cartProducts, cartTotal, paymentMethod]);
+  }, [cartProducts, cartTotal, selectedPaymentMethod]);
 
   const handleInstallApp = async () => {
     if (isStandaloneMode() || isStandaloneApp) {
@@ -744,15 +795,33 @@ ${totalLine}
             <div className="payment-options">
               {paymentMethods.map((method) => (
                 <button
-                  key={method}
+                  key={method.id}
                   type="button"
-                  className={paymentMethod === method ? "active" : ""}
-                  onClick={() => setPaymentMethod(method)}
+                  className={paymentMethod === method.id ? "active" : ""}
+                  onClick={() => setPaymentMethod(method.id)}
                 >
-                  {method}
+                  <span className="payment-option-content">
+                    <strong>{method.label}</strong>
+                    <small>{method.description}</small>
+                  </span>
                 </button>
               ))}
             </div>
+
+            {isShamCashSelected && (
+              <div className="sham-cash-card">
+                <div className="sham-cash-copy">
+                  <h3>الدفع عبر شام كاش</h3>
+                  <p>
+                    امسح رمز QR ثم أرسل صورة إشعار التحويل عبر واتساب مع الطلب.
+                  </p>
+                </div>
+
+                <div className="sham-cash-qr">
+                  <img src={SHAM_CASH_QR_SRC} alt="QR Code شام كاش" />
+                </div>
+              </div>
+            )}
           </div>
 
           <a
