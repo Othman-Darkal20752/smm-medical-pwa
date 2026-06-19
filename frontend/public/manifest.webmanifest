@@ -8,8 +8,8 @@
   "orientation": "portrait",
   "dir": "rtl",
   "lang": "ar",
-  "theme_color": "#d90416",
-  "background_color": "#ffffff",
+  "theme_color": "#0b2f5f",
+  "background_color": "#eaf4ff",
   "categories": ["medical", "shopping", "health"],
   "icons": [
     {

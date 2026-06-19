@@ -23,7 +23,7 @@ function createEmptyForm(defaultCategory) {
   };
 }
 
-function AdminDashboard({ products, setProducts, categoryOptions, onBackToApp }) {
+function AdminDashboard({ products, setProducts, categoryOptions, onBackToApp, exchangeRate = 13000, setExchangeRate }) {
   const [form, setForm] = useState(() => createEmptyForm(categoryOptions[0]));
   const [editingId, setEditingId] = useState(null);
 
@@ -149,6 +149,29 @@ function AdminDashboard({ products, setProducts, categoryOptions, onBackToApp })
           <strong>{stats.bestCount}</strong>
           <span>الأكثر مبيعاً</span>
         </article>
+      </section>
+
+      <section className="admin-card admin-settings-card">
+        <div className="admin-card-title">
+          <h2>إعدادات التسعير</h2>
+          <span>مؤقتاً محلياً قبل ربط الباك إند</span>
+        </div>
+
+        <label className="admin-field">
+          <span>سعر صرف الدولار مقابل الليرة السورية</span>
+          <input
+            type="number"
+            min="1"
+            value={exchangeRate}
+            onChange={(event) => {
+              const value = Number(event.target.value);
+              if (setExchangeRate && Number.isFinite(value)) {
+                setExchangeRate(value);
+              }
+            }}
+            placeholder="مثال: 13000"
+          />
+        </label>
       </section>
 
       <section className="admin-card">

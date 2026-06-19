@@ -32,6 +32,7 @@ import AdminDashboard from "./pages/AdminDashboard";
 
 const CART_STORAGE_KEY = "smm_medical_cart";
 const SHAM_CASH_QR_SRC = "/payments/sham-cash-qr.png";
+const DEFAULT_EXCHANGE_RATE = 13000;
 
 const paymentMethods = [
   {
@@ -65,15 +66,21 @@ function getProductPriceValue(product) {
   return null;
 }
 
-function getProductPriceLabel(product) {
-  if (product.priceLabel) return product.priceLabel;
-  if (typeof product.price === "string") return product.price;
-
+function getProductPriceLabel(product, exchangeRate = DEFAULT_EXCHANGE_RATE) {
   const priceValue = getProductPriceValue(product);
 
   if (priceValue !== null) {
-    return `${priceValue.toLocaleString("en-US")} ل.س`;
+    const safeRate = exchangeRate > 0 ? exchangeRate : DEFAULT_EXCHANGE_RATE;
+    const usdValue = priceValue / safeRate;
+
+    return `$${usdValue.toLocaleString("en-US", {
+      minimumFractionDigits: usdValue < 10 ? 2 : 0,
+      maximumFractionDigits: 2,
+    })} · ${priceValue.toLocaleString("en-US")} ل.س`;
   }
+
+  if (product.priceLabel) return product.priceLabel;
+  if (typeof product.price === "string") return product.price;
 
   return "السعر عند الطلب";
 }
@@ -126,6 +133,15 @@ function App() {
   const [favoriteIds, setFavoriteIds] = useState([]);
   const [cartItems, setCartItems] = useState(() => readStoredCartItems());
   const [paymentMethod, setPaymentMethod] = useState(DEFAULT_PAYMENT_METHOD);
+  const [exchangeRate, setExchangeRate] = useState(() => {
+    const storedRate = Number(localStorage.getItem("smm_exchange_rate"));
+    return Number.isFinite(storedRate) && storedRate > 0
+      ? storedRate
+      : DEFAULT_EXCHANGE_RATE;
+  });
+  const [theme, setTheme] = useState(() => {
+    return localStorage.getItem("smm_theme") || "light";
+  });
   const [visibleProductCount, setVisibleProductCount] = useState(() =>
     getProductsPageSize()
   );
@@ -214,6 +230,15 @@ function App() {
   useEffect(() => {
     localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cartItems));
   }, [cartItems]);
+
+  useEffect(() => {
+    localStorage.setItem("smm_exchange_rate", String(exchangeRate));
+  }, [exchangeRate]);
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme;
+    localStorage.setItem("smm_theme", theme);
+  }, [theme]);
 
   useEffect(() => {
     if (activePage === "products") {
@@ -384,6 +409,10 @@ ${totalLine}
     )}`;
   }, [cartProducts, cartTotal, selectedPaymentMethod]);
 
+  const handleThemeToggle = () => {
+    setTheme((currentTheme) => (currentTheme === "dark" ? "light" : "dark"));
+  };
+
   const handleInstallApp = async () => {
     if (isStandaloneMode() || isStandaloneApp) {
       setInstallHelpOpen(false);
@@ -527,6 +556,7 @@ ${totalLine}
               cartQuantity={cartQuantity}
               onAddToCart={handleAddToCart}
               onToggleFavorite={toggleFavorite}
+              exchangeRate={exchangeRate}
             />
           );
         })}
@@ -536,13 +566,40 @@ ${totalLine}
 
   const renderHomePage = () => (
     <>
-      <HomeHero />
+      <HomeHero onBrowseProducts={() => handlePageChange("products")} />
 
       <CategoryStrip
         categories={categories}
         activeCategory={activeCategory}
         onChange={handleCategoryChange}
       />
+
+      <section className="home-categories-panel">
+        <div className="section-title minimal-section-title">
+          <h2>التصنيفات الطبية</h2>
+          <button type="button" onClick={() => handlePageChange("products")}>
+            عرض الكل
+            <ChevronLeft size={19} />
+          </button>
+        </div>
+
+        <div className="home-category-grid">
+          {categoryOptions.slice(0, 10).map((category, index) => (
+            <button
+              type="button"
+              key={category}
+              className="home-category-card"
+              onClick={() => handleCategoryChange(category)}
+            >
+              <span>{index + 1}</span>
+              <strong>{category}</strong>
+              <small>
+                {productList.filter((product) => product.category === category).length} منتج
+              </small>
+            </button>
+          ))}
+        </div>
+      </section>
 
       <section className="section-block">
         <div className="section-title">
@@ -582,6 +639,7 @@ ${totalLine}
                 cartQuantity={cartQuantity}
                 onAddToCart={handleAddToCart}
                 onToggleFavorite={toggleFavorite}
+                exchangeRate={exchangeRate}
               />
             );
           })}
@@ -610,6 +668,7 @@ ${totalLine}
                 cartQuantity={cartQuantity}
                 onAddToCart={handleAddToCart}
                 onToggleFavorite={toggleFavorite}
+                exchangeRate={exchangeRate}
               />
             );
           })}
@@ -775,7 +834,7 @@ ${totalLine}
                 <div className="cart-item-info">
                   <h3>{item.product.name}</h3>
                   <p>{item.product.category}</p>
-                  <strong>{getProductPriceLabel(item.product)}</strong>
+                  <strong>{getProductPriceLabel(item.product, exchangeRate)}</strong>
                 </div>
 
                 <div className="cart-item-controls">
@@ -937,6 +996,8 @@ ${totalLine}
         setProducts={setProductList}
         categoryOptions={categoryOptions}
         onBackToApp={() => navigateToPath("/")}
+        exchangeRate={exchangeRate}
+        setExchangeRate={setExchangeRate}
       />
     );
   }
@@ -950,9 +1011,36 @@ ${totalLine}
         onSearchChange={handleSearchChange}
         onOpenDrawer={() => setDrawerOpen(true)}
         onCartClick={() => handlePageChange("cart")}
+        onNavigate={handleNavClick}
+        activePage={activePage}
+        whatsappUrl={whatsappUrl}
+        theme={theme}
+        onToggleTheme={handleThemeToggle}
       />
 
       <main className="content app-page-content">{renderPage()}</main>
+
+      <footer className="site-footer">
+        <div>
+          <img src={storeInfo.logo} alt={storeInfo.name} />
+          <p>{storeInfo.description}</p>
+        </div>
+
+        <nav>
+          <strong>التصفح</strong>
+          <button type="button" onClick={() => handlePageChange("home")}>الرئيسية</button>
+          <button type="button" onClick={() => handlePageChange("products")}>المنتجات</button>
+          <button type="button" onClick={() => handlePageChange("offers")}>العروض</button>
+          <button type="button" onClick={() => handlePageChange("contact")}>تواصل معنا</button>
+        </nav>
+
+        <nav>
+          <strong>تواصل معنا</strong>
+          <span>{storeInfo.location}</span>
+          <span dir="ltr">{storeInfo.whatsapp}</span>
+          <a href={whatsappUrl} target="_blank" rel="noreferrer">واتساب</a>
+        </nav>
+      </footer>
 
       <BottomNav activeNav={activePage} onNavigate={handleNavClick} />
 

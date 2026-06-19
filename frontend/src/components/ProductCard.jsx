@@ -1,13 +1,50 @@
 import { Check, Heart, Package, ShoppingCart } from "lucide-react";
 
-function formatPrice(product) {
-  if (product.priceLabel) return product.priceLabel;
-  if (typeof product.price === "string") return product.price;
-  if (typeof product.priceValue === "number") {
-    return `${product.priceValue.toLocaleString("en-US")} ل.س`;
+const badgeLabels = {
+  offer: "عرض",
+  new: "جديد",
+  best: "الأكثر طلباً",
+  available: "متوفر",
+};
+
+function getProductBadges(product) {
+  const badges = [];
+
+  if (product.is_offer || product.tag === "عرض") badges.push("offer");
+  if (product.is_new || product.tag === "جديد") badges.push("new");
+  if (product.is_best_seller || product.tag === "الأكثر طلباً") badges.push("best");
+  if (!badges.length) badges.push("available");
+
+  return badges.slice(0, 2);
+}
+
+function getPriceParts(product, exchangeRate) {
+  const priceValue =
+    typeof product.priceValue === "number"
+      ? product.priceValue
+      : typeof product.price === "number"
+        ? product.price
+        : null;
+
+  if (priceValue === null) {
+    return {
+      requestOnly: true,
+      syp: "السعر عند الطلب",
+      usd: "",
+    };
   }
 
-  return "السعر عند الطلب";
+  const safeExchangeRate = exchangeRate > 0 ? exchangeRate : 13000;
+  const usdValue = Math.max(priceValue / safeExchangeRate, 0.01);
+
+  return {
+    requestOnly: false,
+    syp: `${priceValue.toLocaleString("en-US")} ل.س`,
+    usd: `$${usdValue.toLocaleString("en-US", {
+      minimumFractionDigits: usdValue < 10 ? 2 : 0,
+      maximumFractionDigits: 2,
+    })}`,
+  };
 }
 
 function ProductCard({
@@ -15,43 +52,63 @@ function ProductCard({
   isFavorite,
   isInCart,
   cartQuantity = 0,
+  exchangeRate = 13000,
   onAddToCart,
   onToggleFavorite,
 }) {
-  return (
-    <article className="product-card">
-      <span className={`badge ${product.tone}`}>{product.tag}</span>
+  const price = getPriceParts(product, exchangeRate);
+  const badges = getProductBadges(product);
 
+  return (
+    <article className={`product-card premium-product-card tone-${product.tone}`}>
       <div className={`product-visual ${product.tone}`}>
+        <div className="product-card-badges">
+          {badges.map((badge) => (
+            <span className={`premium-badge ${badge}`} key={badge}>
+              {badgeLabels[badge]}
+            </span>
+          ))}
+        </div>
+
+        <button
+          type="button"
+          aria-label="المفضلة"
+          className={isFavorite ? "favorite-button is-favorite" : "favorite-button"}
+          onClick={() => onToggleFavorite(product.id)}
+        >
+          <Heart size={20} />
+        </button>
+
         {product.image ? (
           <img src={product.image} alt={product.name} />
         ) : (
-          <Package size={54} />
+          <Package size={62} />
         )}
       </div>
 
-      <h3>{product.name}</h3>
-      <p>{product.category}</p>
-      <strong>{formatPrice(product)}</strong>
+      <div className="product-card-body">
+        <p className="product-category">{product.category}</p>
+        <h3>{product.name}</h3>
 
-      <div className="product-actions">
+        <div className={price.requestOnly ? "dual-price request-price" : "dual-price"}>
+          {price.requestOnly ? (
+            <strong>{price.syp}</strong>
+          ) : (
+            <>
+              <strong>{price.usd}</strong>
+              <span>{price.syp}</span>
+            </>
+          )}
+        </div>
+
         <button
           type="button"
           className={isInCart ? "add-cart-button is-added" : "add-cart-button"}
           aria-label="إضافة للسلة"
           onClick={() => onAddToCart(product)}
         >
-          {isInCart ? <Check size={22} /> : <ShoppingCart size={22} />}
-          <span>{isInCart ? `مضاف ${cartQuantity}` : "إضافة"}</span>
-        </button>
-
-        <button
-          type="button"
-          aria-label="المفضلة"
-          className={isFavorite ? "is-favorite" : ""}
-          onClick={() => onToggleFavorite(product.id)}
-        >
-          <Heart size={24} />
+          {isInCart ? <Check size={20} /> : <ShoppingCart size={20} />}
+          <span>{isInCart ? `مضاف ${cartQuantity}` : "أضف للسلة"}</span>
         </button>
       </div>
     </article>
