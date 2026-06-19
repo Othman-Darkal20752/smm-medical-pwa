@@ -618,27 +618,63 @@ ${totalLine}
     </>
   );
 
-  const renderProductsPage = () => (
+  const renderProductsPage = () => {
+  const remainingProductsCount = Math.max(
+    filteredProducts.length - visibleProducts.length,
+    0
+  );
+
+  const hasActiveFilters = activeCategory !== "الكل" || Boolean(searchQuery.trim());
+
+  return (
     <>
       <section className="page-head">
         <span>كتالوج المنتجات</span>
         <h1>المنتجات الطبية</h1>
-        <p>اختر التصنيف المناسب وشاهد المنتجات المتوفرة في مول صحنايا الطبي.</p>
+        <p>
+          اختر التصنيف المناسب وشاهد المنتجات المتوفرة في مول صحنايا الطبي.
+        </p>
       </section>
 
       <CategoryStrip
         categories={categories}
         activeCategory={activeCategory}
-        onChange={setActiveCategory}
+        onChange={handleCategoryChange}
       />
 
-      <section className="section-block products-list-section">
-        <div className="section-title">
+      <section className="products-summary-card">
+        <div className="products-summary-main">
+          <span className="products-status-pill">
+            {activeCategory === "الكل" ? "كل التصنيفات" : activeCategory}
+          </span>
+
           <h2>
             {activeCategory === "الكل" ? "كل المنتجات" : activeCategory}
           </h2>
 
-          {(activeCategory !== "الكل" || searchQuery) && (
+          <p>
+            {searchQuery.trim()
+              ? `نتائج البحث عن: "${searchQuery.trim()}"`
+              : "تصفح المنتجات حسب التصنيف أو استخدم البحث للوصول للمنتج المطلوب بسرعة."}
+          </p>
+        </div>
+
+        <div className="products-summary-meta">
+          <strong>{filteredProducts.length}</strong>
+          <span>منتج مطابق</span>
+        </div>
+      </section>
+
+      <section className="section-block products-list-section">
+        <div className="products-toolbar">
+          <div>
+            <span>المعروض حالياً</span>
+            <strong>
+              {visibleProducts.length} من {filteredProducts.length}
+            </strong>
+          </div>
+
+          {hasActiveFilters && (
             <button type="button" onClick={resetFilters}>
               مسح الفلترة
               <ChevronLeft size={19} />
@@ -652,15 +688,18 @@ ${totalLine}
           <div className="load-more-wrap">
             <button type="button" onClick={handleShowMoreProducts}>
               عرض المزيد من المنتجات
-              <span>
-                {visibleProducts.length} / {filteredProducts.length}
-              </span>
+              <span>{visibleProducts.length} / {filteredProducts.length}</span>
             </button>
+
+            <small>
+              بقي {remainingProductsCount} منتج ضمن النتائج الحالية
+            </small>
           </div>
         )}
       </section>
     </>
   );
+  };
 
   const renderOffersPage = () => (
     <>
