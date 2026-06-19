@@ -1,0 +1,75 @@
+/* Stage 2: real hero image carousel */
+.hero-image-carousel {
+  min-height: 560px;
+  background: #071a33;
+}
+
+.hero-image-carousel .hero-slide-bg {
+  background-image: var(--hero-desktop-image);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  transition: background-image 320ms ease;
+}
+
+.hero-image-carousel::after {
+  background:
+    linear-gradient(90deg, rgba(7, 26, 51, 0.08), rgba(7, 26, 51, 0.84)),
+    radial-gradient(circle at 86% 18%, rgba(255, 255, 255, 0.12), transparent 28%);
+}
+
+.hero-image-content {
+  position: relative;
+  z-index: 1;
+  width: min(620px, 100%);
+  margin-inline-start: auto;
+}
+
+.hero-image-carousel .hero-brand-panel {
+  background: rgba(7, 26, 51, 0.48);
+  border-color: rgba(255, 255, 255, 0.16);
+}
+
+.hero-image-carousel .hero-logo-watermark {
+  display: none;
+}
+
+.hero-image-carousel .hero-actions button:hover,
+.hero-image-carousel .hero-actions a:hover {
+  transform: translateY(-2px);
+}
+
+.hero-image-carousel .hero-dots button {
+  transition: width 180ms ease, background 180ms ease;
+}
+
+@media (max-width: 899px) {
+  .hero-image-carousel {
+    min-height: 560px;
+    border-radius: 28px;
+  }
+
+  .hero-image-carousel .hero-slide-bg {
+    background-image: var(--hero-mobile-image);
+    background-position: center;
+  }
+
+  .hero-image-carousel::after {
+    background:
+      linear-gradient(180deg, rgba(7, 26, 51, 0.2), rgba(7, 26, 51, 0.88)),
+      radial-gradient(circle at 50% 16%, rgba(255, 255, 255, 0.1), transparent 30%);
+  }
+
+  .hero-image-content {
+    margin-inline-start: 0;
+    padding-top: 30px;
+  }
+
+  .hero-image-carousel h1 {
+    max-width: 330px;
+  }
+
+  .hero-image-carousel p {
+    max-width: 330px;
+  }
+}

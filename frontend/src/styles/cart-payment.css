@@ -1,0 +1,100 @@
+/* Cart persistence and payment improvements */
+.payment-option-content {
+  display: grid;
+  gap: 4px;
+}
+
+.payment-option-content strong {
+  color: inherit;
+  font-size: 14px;
+  font-weight: 950;
+}
+
+.payment-option-content small {
+  color: #7b8494;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.6;
+}
+
+.payment-options button.active .payment-option-content small {
+  color: #b00010;
+}
+
+.sham-cash-card {
+  margin-top: 12px;
+  padding: 14px;
+  border: 1px solid rgba(217, 4, 22, 0.18);
+  border-radius: 20px;
+  background:
+    radial-gradient(circle at 15% 20%, rgba(217, 4, 22, 0.08), transparent 34%),
+    #fff7f8;
+  display: grid;
+  grid-template-columns: 1fr 112px;
+  gap: 14px;
+  align-items: center;
+}
+
+.sham-cash-copy h3 {
+  margin: 0 0 7px;
+  color: #071a33;
+  font-size: 15px;
+  font-weight: 950;
+}
+
+.sham-cash-copy p {
+  margin: 0;
+  color: #6b7280;
+  font-size: 12px;
+  line-height: 1.8;
+}
+
+.sham-cash-qr {
+  width: 112px;
+  height: 112px;
+  padding: 8px;
+  border-radius: 18px;
+  background: #ffffff;
+  box-shadow: 0 10px 22px rgba(7, 26, 51, 0.1);
+}
+
+.sham-cash-qr img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+@media (max-width: 390px) {
+  .sham-cash-card {
+    grid-template-columns: 1fr;
+  }
+
+  .sham-cash-qr {
+    margin-inline: auto;
+  }
+}
+
+@media (min-width: 900px) {
+  .checkout-card {
+    width: min(1180px, calc(100% - 48px));
+    margin-inline: auto;
+  }
+
+  .payment-options {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .payment-options button {
+    min-height: 88px;
+  }
+
+  .sham-cash-card {
+    grid-template-columns: 1fr 140px;
+  }
+
+  .sham-cash-qr {
+    width: 140px;
+    height: 140px;
+  }
+}

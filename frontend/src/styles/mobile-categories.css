@@ -1,0 +1,60 @@
+/* Stage 2: mobile horizontal home categories */
+@media (max-width: 899px) {
+  .home-categories-panel {
+    padding: 14px 0 16px;
+    overflow: hidden;
+  }
+
+  .home-categories-panel .minimal-section-title {
+    padding: 0 16px;
+    margin-bottom: 12px;
+  }
+
+  .home-category-grid {
+    display: flex !important;
+    grid-template-columns: none !important;
+    gap: 10px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 0 16px 4px;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .home-category-grid::-webkit-scrollbar {
+    display: none;
+  }
+
+  .home-category-card {
+    flex: 0 0 168px;
+    min-height: 78px;
+    scroll-snap-align: start;
+    border-radius: 20px;
+    padding: 12px;
+    grid-template-columns: 38px 1fr;
+    gap: 4px 10px;
+  }
+
+  .home-category-card span {
+    width: 36px;
+    height: 36px;
+    border-radius: 14px;
+    font-size: 14px;
+  }
+
+  .home-category-card strong {
+    font-size: 13px;
+    line-height: 1.35;
+  }
+
+  .home-category-card small {
+    font-size: 11px;
+  }
+}
+
+@media (max-width: 390px) {
+  .home-category-card {
+    flex-basis: 154px;
+  }
+}
