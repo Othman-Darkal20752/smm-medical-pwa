@@ -36,6 +36,10 @@ const paymentMethods = [
   "اتفاق عبر واتساب",
 ];
 
+const getProductsPageSize = () => {
+  return window.matchMedia("(min-width: 900px)").matches ? 20 : 8;
+};
+
 function getProductPriceValue(product) {
   if (typeof product.priceValue === "number") return product.priceValue;
   if (typeof product.price === "number") return product.price;
@@ -59,6 +63,7 @@ function getProductPriceLabel(product) {
 function formatPrice(value) {
   return `${value.toLocaleString("en-US")} ل.س`;
 }
+
 function isStandaloneMode() {
   return (
     window.matchMedia("(display-mode: standalone)").matches ||
@@ -84,9 +89,15 @@ function App() {
   const [favoriteIds, setFavoriteIds] = useState([]);
   const [cartItems, setCartItems] = useState([]);
   const [paymentMethod, setPaymentMethod] = useState(paymentMethods[0]);
+  const [visibleProductCount, setVisibleProductCount] = useState(() =>
+    getProductsPageSize()
+  );
+
   const [installEvent, setInstallEvent] = useState(null);
   const [installHelpOpen, setInstallHelpOpen] = useState(false);
-  const [isStandaloneApp, setIsStandaloneApp] = useState(() => isStandaloneMode());
+  const [isStandaloneApp, setIsStandaloneApp] = useState(() =>
+    isStandaloneMode()
+  );
 
   const offerRowRef = useRef(null);
   const productRowRef = useRef(null);
@@ -106,54 +117,68 @@ function App() {
       window.removeEventListener("popstate", handlePopState);
     };
   }, []);
+
   useEffect(() => {
-  const cleanupOldInstallStorage = () => {
-    localStorage.removeItem("smm-install-dismissed");
-    localStorage.removeItem("smm-install-dismissed-until");
-    localStorage.removeItem("smm-install-completed");
-    sessionStorage.removeItem("smm-install-dismissed-session");
-  };
+    const cleanupOldInstallStorage = () => {
+      localStorage.removeItem("smm-install-dismissed");
+      localStorage.removeItem("smm-install-dismissed-until");
+      localStorage.removeItem("smm-install-completed");
+      sessionStorage.removeItem("smm-install-dismissed-session");
+    };
 
-  cleanupOldInstallStorage();
+    cleanupOldInstallStorage();
 
-  const handleBeforeInstallPrompt = (event) => {
-    event.preventDefault();
+    const handleBeforeInstallPrompt = (event) => {
+      event.preventDefault();
 
-    if (isStandaloneMode()) {
-      return;
+      if (isStandaloneMode()) {
+        return;
+      }
+
+      setInstallEvent(event);
+    };
+
+    const handleAppInstalled = () => {
+      setInstallEvent(null);
+      setInstallHelpOpen(false);
+      setIsStandaloneApp(true);
+    };
+
+    const displayModeQuery = window.matchMedia("(display-mode: standalone)");
+
+    const handleDisplayModeChange = () => {
+      setIsStandaloneApp(isStandaloneMode());
+    };
+
+    window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+    window.addEventListener("appinstalled", handleAppInstalled);
+
+    if (displayModeQuery.addEventListener) {
+      displayModeQuery.addEventListener("change", handleDisplayModeChange);
+    } else if (displayModeQuery.addListener) {
+      displayModeQuery.addListener(handleDisplayModeChange);
     }
 
-    setInstallEvent(event);
-  };
+    return () => {
+      window.removeEventListener(
+        "beforeinstallprompt",
+        handleBeforeInstallPrompt
+      );
+      window.removeEventListener("appinstalled", handleAppInstalled);
 
-  const handleAppInstalled = () => {
-    setInstallEvent(null);
-    setInstallHelpOpen(false);
-    setIsStandaloneApp(true);
-  };
+      if (displayModeQuery.removeEventListener) {
+        displayModeQuery.removeEventListener("change", handleDisplayModeChange);
+      } else if (displayModeQuery.removeListener) {
+        displayModeQuery.removeListener(handleDisplayModeChange);
+      }
+    };
+  }, []);
 
-  const displayModeQuery = window.matchMedia("(display-mode: standalone)");
-
-  const handleDisplayModeChange = () => {
-    setIsStandaloneApp(isStandaloneMode());
-  };
-
-  window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
-  window.addEventListener("appinstalled", handleAppInstalled);
-
-  if (displayModeQuery.addEventListener) {
-    displayModeQuery.addEventListener("change", handleDisplayModeChange);
-  }
-
-  return () => {
-    window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
-    window.removeEventListener("appinstalled", handleAppInstalled);
-
-    if (displayModeQuery.removeEventListener) {
-      displayModeQuery.removeEventListener("change", handleDisplayModeChange);
+  useEffect(() => {
+    if (activePage === "products") {
+      setVisibleProductCount(getProductsPageSize());
     }
-  };
-}, []);
+  }, [activePage, activeCategory, searchQuery]);
 
   const navigateToPath = (path) => {
     window.history.pushState(null, "", path);
@@ -186,6 +211,16 @@ function App() {
       return matchesCategory && matchesSearch;
     });
   }, [activeCategory, searchQuery, productList]);
+
+  const visibleProducts = useMemo(() => {
+    return filteredProducts.slice(0, visibleProductCount);
+  }, [filteredProducts, visibleProductCount]);
+
+  const hasMoreProducts = visibleProductCount < filteredProducts.length;
+
+  const handleShowMoreProducts = () => {
+    setVisibleProductCount((count) => count + getProductsPageSize());
+  };
 
   const newProducts = useMemo(() => {
     const list = productList.filter((product) => product.is_new);
@@ -298,37 +333,36 @@ ${totalLine}
     )}`;
   }, [cartProducts, cartTotal, paymentMethod]);
 
-
   const handleInstallApp = async () => {
-  if (isStandaloneMode() || isStandaloneApp) {
-    setInstallHelpOpen(false);
-    return;
-  }
-
-  if (!installEvent) {
-    setInstallHelpOpen(true);
-    return;
-  }
-
-  try {
-    installEvent.prompt();
-
-    const result = await installEvent.userChoice;
-
-    setInstallEvent(null);
-
-    if (result.outcome === "accepted") {
-      setIsStandaloneApp(true);
+    if (isStandaloneMode() || isStandaloneApp) {
       setInstallHelpOpen(false);
       return;
     }
 
-    setInstallHelpOpen(true);
-  } catch {
-    setInstallEvent(null);
-    setInstallHelpOpen(true);
-  }
-};
+    if (!installEvent) {
+      setInstallHelpOpen(true);
+      return;
+    }
+
+    try {
+      installEvent.prompt();
+
+      const result = await installEvent.userChoice;
+
+      setInstallEvent(null);
+
+      if (result.outcome === "accepted") {
+        setIsStandaloneApp(true);
+        setInstallHelpOpen(false);
+        return;
+      }
+
+      setInstallHelpOpen(true);
+    } catch {
+      setInstallEvent(null);
+      setInstallHelpOpen(true);
+    }
+  };
 
   const handlePageChange = (page) => {
     setActivePage(page);
@@ -561,7 +595,18 @@ ${totalLine}
           )}
         </div>
 
-        {renderProductCards(filteredProducts)}
+        {renderProductCards(visibleProducts)}
+
+        {hasMoreProducts && (
+          <div className="load-more-wrap">
+            <button type="button" onClick={handleShowMoreProducts}>
+              عرض المزيد من المنتجات
+              <span>
+                {visibleProducts.length} / {filteredProducts.length}
+              </span>
+            </button>
+          </div>
+        )}
       </section>
     </>
   );
@@ -805,14 +850,17 @@ ${totalLine}
 
       {drawerOpen && (
         <DrawerMenu
-  onClose={() => setDrawerOpen(false)}
-  onNavigate={handleNavClick}
-  onInstallApp={handleInstallApp}
-  showInstallAction={!isStandaloneApp && isInstallSupportedDevice()}
-/>
+          onClose={() => setDrawerOpen(false)}
+          onNavigate={handleNavClick}
+          onInstallApp={handleInstallApp}
+          showInstallAction={!isStandaloneApp && isInstallSupportedDevice()}
+        />
       )}
 
-      <InstallPrompt />
+      <InstallPrompt
+        isOpen={installHelpOpen}
+        onClose={() => setInstallHelpOpen(false)}
+      />
     </div>
   );
 }

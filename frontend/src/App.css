@@ -1357,214 +1357,43 @@ button {
   }
 }
 
-/* =========================================================
-   SMM responsive website patch
-   Desktop = normal website
-   Mobile = PWA app shell
-   ========================================================= */
+
+/* Products page load more */
+.load-more-wrap {
+  display: flex;
+  justify-content: center;
+  padding: 18px 0 8px;
+}
+
+.load-more-wrap button {
+  min-width: 220px;
+  border: 0;
+  border-radius: 18px;
+  padding: 13px 20px;
+  background: var(--smm-red);
+  color: #ffffff;
+  font-weight: 900;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  box-shadow: 0 12px 26px rgba(217, 4, 22, 0.22);
+}
+
+.load-more-wrap button span {
+  padding: 4px 9px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.18);
+  font-size: 12px;
+  font-weight: 900;
+}
 
 @media (min-width: 900px) {
-  body {
-    background: #eef2f6;
+  .load-more-wrap {
+    padding-top: 24px;
   }
 
-  .app {
-    max-width: none;
-    width: 100%;
-    min-height: 100vh;
-    margin: 0;
-    padding-bottom: 0;
-    box-shadow: none;
-    background: #eef2f6;
-  }
-
-  .top-bar {
-    position: sticky;
-    top: 0;
-    width: 100%;
-    padding: 18px 32px 22px;
-    border-radius: 0;
-  }
-
-  .top-actions,
-  .search-box,
-  .tabs,
-  .content,
-  .app-page-content {
-    width: min(1180px, calc(100% - 48px));
-    margin-inline: auto;
-  }
-
-  .top-actions {
-    min-height: 54px;
-  }
-
-  .search-box {
-    max-width: 760px;
-    height: 50px;
-    margin-top: 16px;
-  }
-
-  .tabs {
-    display: flex;
-    justify-content: center;
-    gap: 34px;
-    margin-top: 0;
-    border-radius: 0 0 22px 22px;
-    border: 1px solid var(--line);
-    border-top: 0;
-    overflow: hidden;
-  }
-
-  .tabs button {
-    min-width: 170px;
-  }
-
-  .content {
-    padding: 28px 0 56px;
-  }
-
-  .hero-card {
-    min-height: 260px;
-    padding: 36px 44px;
-    justify-content: space-between;
-  }
-
-  .hero-card h1 {
-    max-width: 620px;
-    font-size: 36px;
-  }
-
-  .hero-card p {
-    max-width: 680px;
-    font-size: 16px;
-  }
-
-  .hero-icon {
-    flex-basis: 126px;
-    width: 126px;
-    height: 126px;
-  }
-
-  .category-strip {
-    padding: 22px 0 12px;
-  }
-
-  .section-block {
-    margin-top: 28px;
-    scroll-margin-top: 170px;
-  }
-
-  .section-title {
-    border-radius: 22px;
-  }
-
-  .product-row {
-    gap: 18px;
-  }
-
-  .product-row .product-card {
-    flex: 0 0 245px;
-  }
-
-  .offer-row {
-    gap: 18px;
-  }
-
-  .offer-card {
-    flex-basis: 420px;
-  }
-
-  .page-head {
-    width: min(1180px, calc(100% - 48px));
-    margin: 28px auto 18px;
-  }
-
-  .page-product-grid {
-    width: min(1180px, calc(100% - 48px));
-    margin-inline: auto;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 18px;
-    padding: 0 0 32px;
-  }
-
-  .bottom-nav {
-    display: none;
-  }
-
-  .install-prompt {
-    bottom: 24px;
-  }
-
-  .drawer {
-    width: min(420px, 34vw);
-    border-radius: 0 0 0 28px;
-  }
-}
-
-@media (min-width: 1200px) {
-  .page-product-grid {
-    grid-template-columns: repeat(5, minmax(0, 1fr));
-  }
-}
-
-/* Product card height consistency */
-.product-card {
-  display: flex;
-  flex-direction: column;
-  min-height: 360px;
-}
-
-.product-visual {
-  flex: 0 0 142px;
-}
-
-.product-card h3 {
-  min-height: 52px;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.product-card p {
-  min-height: 22px;
-  display: -webkit-box;
-  -webkit-line-clamp: 1;
-  line-clamp: 1;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.product-card strong {
-  display: block;
-  min-height: 30px;
-  margin-top: auto;
-  line-height: 1.5;
-}
-
-.product-actions {
-  margin-top: 12px;
-}
-
-.page-product-grid .product-card {
-  width: 100%;
-  min-width: 0;
-}
-
-@media (max-width: 899px) {
-  .app {
-    max-width: 520px;
-    margin: 0 auto;
-    padding-bottom: 96px;
-  }
-
-  .bottom-nav {
-    display: grid;
-  }
-
-  .page-product-grid .product-card {
-    min-height: 345px;
+  .load-more-wrap button {
+    min-width: 260px;
   }
 }
