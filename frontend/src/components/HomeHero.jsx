@@ -1,34 +1,35 @@
 import { useEffect, useMemo, useState } from "react";
-import { ChevronLeft, MessageCircle, PackageSearch, ShieldCheck } from "lucide-react";
+import { ChevronLeft, MessageCircle, PackageSearch } from "lucide-react";
 import { storeInfo } from "../data/storeInfo";
 
 function HomeHero({ onBrowseProducts }) {
   const whatsappUrl = `https://wa.me/${storeInfo.whatsappRaw}`;
+
   const slides = useMemo(
     () => [
       {
-        eyebrow: "SAHNAYA MEDICAL MALL",
-        title: storeInfo.tagline,
+        eyebrow: "نظارات طبية وشمسية",
+        title: "نظارات طبية وشمسية بتصاميم موثوقة",
         text:
-          "أجهزة طبية، مستلزمات، مواد سنية، دعامات، نظارات ومنتجات عناية — تحت سقف واحد موثوق.",
-        background:
-          "radial-gradient(circle at 12% 25%, rgba(255,255,255,0.12), transparent 26%), radial-gradient(circle at 82% 78%, rgba(217,36,58,0.22), transparent 28%), linear-gradient(135deg, #06192f, #123b70)",
+          "اختيارات أنيقة وعملية للنظارات الطبية والشمسية ضمن مول صحنايا الطبي.",
+        desktopImage: "/hero/hero-1-desktop.webp",
+        mobileImage: "/hero/hero-1-mobile.webp",
+      },
+      {
+        eyebrow: "SAHNAYA MEDICAL MALL",
+        title: "كل ما يلزم الطبيب والمريض تجده هنا",
+        text:
+          "أجهزة طبية، مستلزمات، مواد سنية، دعامات، نظارات ومنتجات عناية تحت سقف واحد.",
+        desktopImage: "/hero/hero-2-desktop.webp",
+        mobileImage: "/hero/hero-2-mobile.webp",
       },
       {
         eyebrow: "منتجات موثوقة ومرخصة",
-        title: "حلول طبية للعيادات والمرضى",
+        title: "تجربة تصفح طبية حديثة وسريعة",
         text:
           "تصفح التصنيفات والعروض، وأرسل طلبك مباشرة عبر واتساب لتأكيد التوفر والسعر النهائي.",
-        background:
-          "radial-gradient(circle at 18% 72%, rgba(29,143,227,0.26), transparent 30%), radial-gradient(circle at 82% 22%, rgba(255,255,255,0.12), transparent 26%), linear-gradient(135deg, #071a33, #0f4c81)",
-      },
-      {
-        eyebrow: "جاهز كتالوج وتطبيق PWA",
-        title: "تجربة تصفح سريعة ومريحة",
-        text:
-          "تصميم مناسب للموبايل كتطبيق قابل للتثبيت، وعلى الديسكتوب كموقع طبي احترافي.",
-        background:
-          "radial-gradient(circle at 20% 20%, rgba(217,36,58,0.24), transparent 26%), radial-gradient(circle at 76% 72%, rgba(234,247,255,0.18), transparent 30%), linear-gradient(135deg, #0b2140, #071a33)",
+        desktopImage: "/hero/hero-3-desktop.webp",
+        mobileImage: "/hero/hero-3-mobile.webp",
       },
     ],
     []
@@ -47,10 +48,17 @@ function HomeHero({ onBrowseProducts }) {
   const slide = slides[activeSlide];
 
   return (
-    <section className="hero-carousel" id="home-section">
-      <div className="hero-slide-bg" style={{ background: slide.background }} />
+    <section className="hero-carousel hero-image-carousel" id="home-section">
+      <div
+        className="hero-slide-bg"
+        aria-hidden="true"
+        style={{
+          "--hero-desktop-image": `url("${slide.desktopImage}")`,
+          "--hero-mobile-image": `url("${slide.mobileImage}")`,
+        }}
+      />
 
-      <div className="hero-carousel-content">
+      <div className="hero-carousel-content hero-image-content">
         <div className="hero-brand-panel">
           <img src={storeInfo.logo} alt={storeInfo.name} />
           <div>
@@ -92,15 +100,10 @@ function HomeHero({ onBrowseProducts }) {
         </div>
       </div>
 
-      <div className="hero-logo-watermark" aria-hidden="true">
-        <img src={storeInfo.logo} alt="" />
-        <ShieldCheck size={42} />
-      </div>
-
       <div className="hero-dots" aria-label="شرائح العرض">
         {slides.map((item, index) => (
           <button
-            key={item.eyebrow}
+            key={item.desktopImage}
             type="button"
             className={index === activeSlide ? "active" : ""}
             onClick={() => setActiveSlide(index)}

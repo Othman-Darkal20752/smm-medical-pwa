@@ -1,9 +1,15 @@
-const CACHE_NAME = "smm-pwa-v2";
+const CACHE_NAME = "smm-pwa-v3";
 
 const STATIC_ASSETS = [
   "/",
   "/manifest.webmanifest",
-  "/icons/smm-icon.svg"
+  "/icons/smm-icon.svg",
+  "/hero/hero-1-desktop.webp",
+  "/hero/hero-1-mobile.webp",
+  "/hero/hero-2-desktop.webp",
+  "/hero/hero-2-mobile.webp",
+  "/hero/hero-3-desktop.webp",
+  "/hero/hero-3-mobile.webp"
 ];
 
 self.addEventListener("install", (event) => {
