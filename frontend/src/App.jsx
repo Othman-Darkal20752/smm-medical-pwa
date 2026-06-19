@@ -59,6 +59,19 @@ function getProductPriceLabel(product) {
 function formatPrice(value) {
   return `${value.toLocaleString("en-US")} ل.س`;
 }
+function isStandaloneMode() {
+  return (
+    window.matchMedia("(display-mode: standalone)").matches ||
+    window.navigator.standalone === true
+  );
+}
+
+function isInstallSupportedDevice() {
+  return (
+    /android|iphone|ipad|ipod/i.test(window.navigator.userAgent) ||
+    window.matchMedia("(max-width: 768px)").matches
+  );
+}
 
 function App() {
   const [currentPath, setCurrentPath] = useState(() => window.location.pathname);
@@ -71,6 +84,9 @@ function App() {
   const [favoriteIds, setFavoriteIds] = useState([]);
   const [cartItems, setCartItems] = useState([]);
   const [paymentMethod, setPaymentMethod] = useState(paymentMethods[0]);
+  const [installEvent, setInstallEvent] = useState(null);
+  const [installHelpOpen, setInstallHelpOpen] = useState(false);
+  const [isStandaloneApp, setIsStandaloneApp] = useState(() => isStandaloneMode());
 
   const offerRowRef = useRef(null);
   const productRowRef = useRef(null);
@@ -90,6 +106,54 @@ function App() {
       window.removeEventListener("popstate", handlePopState);
     };
   }, []);
+  useEffect(() => {
+  const cleanupOldInstallStorage = () => {
+    localStorage.removeItem("smm-install-dismissed");
+    localStorage.removeItem("smm-install-dismissed-until");
+    localStorage.removeItem("smm-install-completed");
+    sessionStorage.removeItem("smm-install-dismissed-session");
+  };
+
+  cleanupOldInstallStorage();
+
+  const handleBeforeInstallPrompt = (event) => {
+    event.preventDefault();
+
+    if (isStandaloneMode()) {
+      return;
+    }
+
+    setInstallEvent(event);
+  };
+
+  const handleAppInstalled = () => {
+    setInstallEvent(null);
+    setInstallHelpOpen(false);
+    setIsStandaloneApp(true);
+  };
+
+  const displayModeQuery = window.matchMedia("(display-mode: standalone)");
+
+  const handleDisplayModeChange = () => {
+    setIsStandaloneApp(isStandaloneMode());
+  };
+
+  window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+  window.addEventListener("appinstalled", handleAppInstalled);
+
+  if (displayModeQuery.addEventListener) {
+    displayModeQuery.addEventListener("change", handleDisplayModeChange);
+  }
+
+  return () => {
+    window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+    window.removeEventListener("appinstalled", handleAppInstalled);
+
+    if (displayModeQuery.removeEventListener) {
+      displayModeQuery.removeEventListener("change", handleDisplayModeChange);
+    }
+  };
+}, []);
 
   const navigateToPath = (path) => {
     window.history.pushState(null, "", path);
@@ -233,6 +297,38 @@ ${totalLine}
       message
     )}`;
   }, [cartProducts, cartTotal, paymentMethod]);
+
+
+  const handleInstallApp = async () => {
+  if (isStandaloneMode() || isStandaloneApp) {
+    setInstallHelpOpen(false);
+    return;
+  }
+
+  if (!installEvent) {
+    setInstallHelpOpen(true);
+    return;
+  }
+
+  try {
+    installEvent.prompt();
+
+    const result = await installEvent.userChoice;
+
+    setInstallEvent(null);
+
+    if (result.outcome === "accepted") {
+      setIsStandaloneApp(true);
+      setInstallHelpOpen(false);
+      return;
+    }
+
+    setInstallHelpOpen(true);
+  } catch {
+    setInstallEvent(null);
+    setInstallHelpOpen(true);
+  }
+};
 
   const handlePageChange = (page) => {
     setActivePage(page);
@@ -709,9 +805,11 @@ ${totalLine}
 
       {drawerOpen && (
         <DrawerMenu
-          onClose={() => setDrawerOpen(false)}
-          onNavigate={handleNavClick}
-        />
+  onClose={() => setDrawerOpen(false)}
+  onNavigate={handleNavClick}
+  onInstallApp={handleInstallApp}
+  showInstallAction={!isStandaloneApp && isInstallSupportedDevice()}
+/>
       )}
 
       <InstallPrompt />

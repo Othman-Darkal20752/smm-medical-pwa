@@ -1,130 +1,13 @@
-import { useEffect, useState } from "react";
 import "../styles/install-prompt.css";
-
-const DISMISS_UNTIL_KEY = "smm-install-dismissed-until";
-
-const DISMISS_DAYS = 7;
-const ONE_DAY_MS = 24 * 60 * 60 * 1000;
-
-function isStandaloneMode() {
-  return (
-    window.matchMedia("(display-mode: standalone)").matches ||
-    window.navigator.standalone === true
-  );
-}
 
 function isIOSDevice() {
   return /iphone|ipad|ipod/i.test(window.navigator.userAgent);
 }
 
-function isMobileBrowser() {
-  return (
-    /android|iphone|ipad|ipod/i.test(window.navigator.userAgent) ||
-    window.matchMedia("(max-width: 768px)").matches
-  );
-}
+export default function InstallPrompt({ isOpen, onClose }) {
+  const isIOS = isIOSDevice();
 
-function isAdminPath() {
-  return window.location.pathname.startsWith("/admin");
-}
-
-function isDismissedByCooldown() {
-  const dismissedUntil = Number(localStorage.getItem(DISMISS_UNTIL_KEY) || 0);
-  return dismissedUntil > Date.now();
-}
-
-function markDismissed() {
-  const dismissedUntil = Date.now() + DISMISS_DAYS * ONE_DAY_MS;
-  localStorage.setItem(DISMISS_UNTIL_KEY, String(dismissedUntil));
-}
-
-function cleanupOldInstallStorage() {
-  localStorage.removeItem("smm-install-dismissed");
-  localStorage.removeItem("smm-install-completed");
-  sessionStorage.removeItem("smm-install-dismissed-session");
-}
-
-export default function InstallPrompt() {
-  const [installEvent, setInstallEvent] = useState(null);
-  const [isVisible, setIsVisible] = useState(false);
-  const [isInstalled, setIsInstalled] = useState(() => isStandaloneMode());
-
-  const [isIOS] = useState(() => isIOSDevice());
-  const [isMobile] = useState(() => isMobileBrowser());
-
-  useEffect(() => {
-    cleanupOldInstallStorage();
-
-    if (isInstalled || isAdminPath() || !isMobile || isDismissedByCooldown()) {
-      return;
-    }
-
-    const handleBeforeInstallPrompt = (event) => {
-      event.preventDefault();
-
-      if (isStandaloneMode() || isDismissedByCooldown()) {
-        return;
-      }
-
-      setInstallEvent(event);
-      setIsVisible(true);
-    };
-
-    const handleAppInstalled = () => {
-      cleanupOldInstallStorage();
-      setIsInstalled(true);
-      setIsVisible(false);
-      setInstallEvent(null);
-    };
-
-    window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
-    window.addEventListener("appinstalled", handleAppInstalled);
-
-    let iosTimer = null;
-
-    if (isIOS) {
-      iosTimer = window.setTimeout(() => {
-        if (!isStandaloneMode() && !isDismissedByCooldown()) {
-          setIsVisible(true);
-        }
-      }, 1600);
-    }
-
-    return () => {
-      if (iosTimer) {
-        window.clearTimeout(iosTimer);
-      }
-
-      window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
-      window.removeEventListener("appinstalled", handleAppInstalled);
-    };
-  }, [isInstalled, isIOS, isMobile]);
-
-  const handleInstall = async () => {
-    if (!installEvent) return;
-
-    installEvent.prompt();
-
-    const result = await installEvent.userChoice;
-
-    if (result.outcome === "accepted") {
-      cleanupOldInstallStorage();
-      setIsInstalled(true);
-      setIsVisible(false);
-      setInstallEvent(null);
-      return;
-    }
-
-    markDismissed();
-    setIsVisible(false);
-  };
-
-  const handleDismiss = () => {
-    markDismissed();
-    setIsVisible(false);
-  };
-
-  if (isInstalled || !isVisible) {
+  if (!isOpen) {
     return null;
   }
 
@@ -133,8 +16,8 @@ export default function InstallPrompt() {
       <button
         type="button"
         className="install-prompt__close"
-        onClick={handleDismiss}
-        aria-label="إغلاق رسالة تثبيت التطبيق"
+        onClick={onClose}
+        aria-label="إغلاق تعليمات تثبيت التطبيق"
       >
         ×
       </button>
@@ -142,30 +25,30 @@ export default function InstallPrompt() {
       <div className="install-prompt__icon">＋</div>
 
       <div className="install-prompt__content">
-        <h3>ثبّت تطبيق SMM</h3>
+        <h3>تثبيت تطبيق SMM</h3>
 
-        {isIOS && !installEvent ? (
+        {isIOS ? (
           <p>
-            افتح زر المشاركة في Safari ثم اختر
+            من Safari اضغط زر المشاركة ثم اختر
             <strong> إضافة إلى الشاشة الرئيسية </strong>
-            لاستخدام الكتالوج كتطبيق.
+            لتثبيت الكتالوج كتطبيق.
           </p>
         ) : (
           <p>
-            أضف مول صحنايا الطبي إلى الشاشة الرئيسية لتصفّح المنتجات الطبية بسرعة.
+            من قائمة Chrome <strong>⋮</strong> اختر
+            <strong> تثبيت التطبيق </strong>
+            أو <strong> إضافة إلى الشاشة الرئيسية </strong>.
           </p>
         )}
       </div>
 
-      {installEvent && (
-        <button
-          type="button"
-          className="install-prompt__button"
-          onClick={handleInstall}
-        >
-          تثبيت
-        </button>
-      )}
+      <button
+        type="button"
+        className="install-prompt__button"
+        onClick={onClose}
+      >
+        حسناً
+      </button>
     </div>
   );
 }

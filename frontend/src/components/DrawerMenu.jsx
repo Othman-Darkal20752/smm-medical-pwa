@@ -1,6 +1,7 @@
 import {
   Bell,
   ChevronLeft,
+  Download,
   HeartPulse,
   Home,
   MessageCircle,
@@ -10,10 +11,19 @@ import {
 } from "lucide-react";
 import { storeInfo } from "../data/storeInfo";
 
-function DrawerMenu({ onClose, onNavigate }) {
+function DrawerMenu({ onClose, onNavigate, onInstallApp, showInstallAction }) {
   const goTo = (id) => {
     onClose();
     onNavigate(id);
+  };
+
+  const handleInstallClick = (event) => {
+    event.preventDefault();
+    onClose();
+
+    if (onInstallApp) {
+      onInstallApp();
+    }
   };
 
   const whatsappUrl = `https://wa.me/${storeInfo.whatsappRaw}`;
@@ -104,6 +114,14 @@ function DrawerMenu({ onClose, onNavigate }) {
           الأكثر طلباً
           <ChevronLeft size={20} />
         </a>
+
+        {showInstallAction && (
+          <a href="#install-app" onClick={handleInstallClick}>
+            <Download size={25} />
+            تثبيت التطبيق
+            <ChevronLeft size={20} />
+          </a>
+        )}
 
         <a href={whatsappUrl} target="_blank" rel="noreferrer">
           <MessageCircle size={25} />
