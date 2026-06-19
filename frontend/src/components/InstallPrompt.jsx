@@ -1,7 +1,10 @@
 import { useEffect, useState } from "react";
 import "../styles/install-prompt.css";
 
-const SESSION_DISMISS_KEY = "smm-install-dismissed-session";
+const DISMISS_UNTIL_KEY = "smm-install-dismissed-until";
+
+const DISMISS_DAYS = 7;
+const ONE_DAY_MS = 24 * 60 * 60 * 1000;
 
 function isStandaloneMode() {
   return (
@@ -25,51 +28,77 @@ function isAdminPath() {
   return window.location.pathname.startsWith("/admin");
 }
 
-function isDismissedForCurrentSession() {
-  return sessionStorage.getItem(SESSION_DISMISS_KEY) === "true";
+function isDismissedByCooldown() {
+  const dismissedUntil = Number(localStorage.getItem(DISMISS_UNTIL_KEY) || 0);
+  return dismissedUntil > Date.now();
+}
+
+function markDismissed() {
+  const dismissedUntil = Date.now() + DISMISS_DAYS * ONE_DAY_MS;
+  localStorage.setItem(DISMISS_UNTIL_KEY, String(dismissedUntil));
+}
+
+function cleanupOldInstallStorage() {
+  localStorage.removeItem("smm-install-dismissed");
+  localStorage.removeItem("smm-install-completed");
+  sessionStorage.removeItem("smm-install-dismissed-session");
 }
 
 export default function InstallPrompt() {
   const [installEvent, setInstallEvent] = useState(null);
   const [isVisible, setIsVisible] = useState(false);
   const [isInstalled, setIsInstalled] = useState(() => isStandaloneMode());
+
   const [isIOS] = useState(() => isIOSDevice());
   const [isMobile] = useState(() => isMobileBrowser());
 
   useEffect(() => {
-    if (isInstalled || isAdminPath() || !isMobile || isDismissedForCurrentSession()) {
+    cleanupOldInstallStorage();
+
+    if (isInstalled || isAdminPath() || !isMobile || isDismissedByCooldown()) {
       return;
     }
 
     const handleBeforeInstallPrompt = (event) => {
       event.preventDefault();
+
+      if (isStandaloneMode() || isDismissedByCooldown()) {
+        return;
+      }
+
       setInstallEvent(event);
       setIsVisible(true);
     };
 
     const handleAppInstalled = () => {
+      cleanupOldInstallStorage();
       setIsInstalled(true);
       setIsVisible(false);
       setInstallEvent(null);
-      sessionStorage.removeItem(SESSION_DISMISS_KEY);
-      localStorage.removeItem("smm-install-dismissed");
     };
 
     window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
     window.addEventListener("appinstalled", handleAppInstalled);
 
-    const fallbackTimer = window.setTimeout(() => {
-      if (!isStandaloneMode() && !isDismissedForCurrentSession()) {
-        setIsVisible(true);
-      }
-    }, 1600);
+    let iosTimer = null;
+
+    if (isIOS) {
+      iosTimer = window.setTimeout(() => {
+        if (!isStandaloneMode() && !isDismissedByCooldown()) {
+          setIsVisible(true);
+        }
+      }, 1600);
+    }
 
     return () => {
-      window.clearTimeout(fallbackTimer);
+      if (iosTimer) {
+        window.clearTimeout(iosTimer);
+      }
+
       window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
       window.removeEventListener("appinstalled", handleAppInstalled);
     };
-  }, [isInstalled, isMobile]);
+  }, [isInstalled, isIOS, isMobile]);
 
   const handleInstall = async () => {
     if (!installEvent) return;
@@ -79,14 +108,19 @@ export default function InstallPrompt() {
     const result = await installEvent.userChoice;
 
     if (result.outcome === "accepted") {
+      cleanupOldInstallStorage();
+      setIsInstalled(true);
       setIsVisible(false);
       setInstallEvent(null);
+      return;
     }
+
+    markDismissed();
+    setIsVisible(false);
   };
 
   const handleDismiss = () => {
-    sessionStorage.setItem(SESSION_DISMISS_KEY, "true");
-    localStorage.removeItem("smm-install-dismissed");
+    markDismissed();
     setIsVisible(false);
   };
 
@@ -110,11 +144,7 @@ export default function InstallPrompt() {
       <div className="install-prompt__content">
         <h3>ثبّت تطبيق SMM</h3>
 
-        {installEvent ? (
-          <p>
-            أضف مول صحنايا الطبي إلى الشاشة الرئيسية لتصفّح المنتجات الطبية بسرعة.
-          </p>
-        ) : isIOS ? (
+        {isIOS && !installEvent ? (
           <p>
             افتح زر المشاركة في Safari ثم اختر
             <strong> إضافة إلى الشاشة الرئيسية </strong>
@@ -122,9 +152,7 @@ export default function InstallPrompt() {
           </p>
         ) : (
           <p>
-            من قائمة المتصفح <strong>⋮</strong> اختر
-            <strong> تثبيت التطبيق </strong>
-            أو <strong>إضافة إلى الشاشة الرئيسية</strong>.
+            أضف مول صحنايا الطبي إلى الشاشة الرئيسية لتصفّح المنتجات الطبية بسرعة.
           </p>
         )}
       </div>
