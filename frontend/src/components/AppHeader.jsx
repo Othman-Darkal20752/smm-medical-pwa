@@ -28,6 +28,8 @@ function AppHeader({
   theme,
   onToggleTheme,
 }) {
+  const ThemeIcon = theme === "dark" ? Sun : Moon;
+
   return (
     <header className="site-header">
       <div className="header-service-strip">
@@ -45,6 +47,15 @@ function AppHeader({
           onClick={onOpenDrawer}
         >
           <Menu size={30} />
+        </button>
+
+        <button
+          className="theme-toggle-button mobile-theme-toggle"
+          type="button"
+          aria-label="تبديل الوضع"
+          onClick={onToggleTheme}
+        >
+          <ThemeIcon size={20} />
         </button>
 
         <button
@@ -91,7 +102,7 @@ function AppHeader({
             aria-label="تبديل الوضع"
             onClick={onToggleTheme}
           >
-            {theme === "dark" ? <Sun size={20} /> : <Moon size={20} />}
+            <ThemeIcon size={20} />
           </button>
 
           <a
