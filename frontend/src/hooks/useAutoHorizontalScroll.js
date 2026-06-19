@@ -6,19 +6,47 @@ export function useAutoHorizontalScroll(ref, enabled = true, resetKey = "") {
 
     if (!el || !enabled) return;
 
-    let frameId;
-    let paused = false;
-    let position = 0;
+    const prefersReducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)"
+    ).matches;
 
-    const speed = 0.28;
+    if (prefersReducedMotion) return;
+
+    let frameId = 0;
+    let position = 0;
+    let pauseUntil = 0;
+    let isVisible = true;
+    let isAutoScrolling = false;
+
+    const speed = 0.22;
+    const userPauseMs = 4200;
+    const pageScrollPauseMs = 1800;
 
     el.scrollLeft = 0;
 
+    const now = () => window.performance.now();
+
+    const pauseFor = (duration) => {
+      pauseUntil = Math.max(pauseUntil, now() + duration);
+      position = el.scrollLeft;
+    };
+
+    const canAutoScroll = () => {
+      return (
+        isVisible &&
+        !document.hidden &&
+        now() >= pauseUntil &&
+        el.scrollWidth > el.clientWidth + 4
+      );
+    };
+
     const step = () => {
-      if (!paused && el.scrollWidth > el.clientWidth) {
+      if (canAutoScroll()) {
         const loopPoint = el.scrollWidth / 2;
 
         position += speed;
+
+        isAutoScrolling = true;
 
         if (position >= loopPoint - 2) {
           position = 0;
@@ -26,39 +54,79 @@ export function useAutoHorizontalScroll(ref, enabled = true, resetKey = "") {
         } else {
           el.scrollLeft = position;
         }
+
+        window.requestAnimationFrame(() => {
+          isAutoScrolling = false;
+        });
       }
 
-      frameId = requestAnimationFrame(step);
+      frameId = window.requestAnimationFrame(step);
     };
 
-    const pause = () => {
-      paused = true;
-      position = el.scrollLeft;
+    const handleUserInteraction = () => {
+      pauseFor(userPauseMs);
     };
 
-    const resume = () => {
-      window.setTimeout(() => {
-        position = el.scrollLeft;
-        paused = false;
-      }, 700);
+    const handlePageScroll = () => {
+      pauseFor(pageScrollPauseMs);
     };
 
-    el.addEventListener("touchstart", pause, { passive: true });
-    el.addEventListener("touchend", resume);
-    el.addEventListener("pointerdown", pause);
-    el.addEventListener("pointerup", resume);
-    el.addEventListener("pointercancel", resume);
+    const handleElementScroll = () => {
+      if (!isAutoScrolling) {
+        pauseFor(userPauseMs);
+      }
+    };
 
-    frameId = requestAnimationFrame(step);
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        isVisible = entry.isIntersecting;
+
+        if (isVisible) {
+          position = el.scrollLeft;
+        }
+      },
+      {
+        threshold: 0.12,
+      }
+    );
+
+    observer.observe(el);
+
+    el.addEventListener("scroll", handleElementScroll, { passive: true });
+    el.addEventListener("touchstart", handleUserInteraction, { passive: true });
+    el.addEventListener("touchmove", handleUserInteraction, { passive: true });
+    el.addEventListener("touchend", handleUserInteraction, { passive: true });
+    el.addEventListener("pointerdown", handleUserInteraction);
+    el.addEventListener("pointermove", handleUserInteraction);
+    el.addEventListener("pointerup", handleUserInteraction);
+    el.addEventListener("wheel", handleUserInteraction, { passive: true });
+    el.addEventListener("mouseenter", handleUserInteraction);
+    el.addEventListener("mouseleave", handleUserInteraction);
+
+    window.addEventListener("scroll", handlePageScroll, { passive: true });
+    window.addEventListener("wheel", handlePageScroll, { passive: true });
+    window.addEventListener("touchmove", handlePageScroll, { passive: true });
+
+    frameId = window.requestAnimationFrame(step);
 
     return () => {
-      cancelAnimationFrame(frameId);
+      window.cancelAnimationFrame(frameId);
+      observer.disconnect();
 
-      el.removeEventListener("touchstart", pause);
-      el.removeEventListener("touchend", resume);
-      el.removeEventListener("pointerdown", pause);
-      el.removeEventListener("pointerup", resume);
-      el.removeEventListener("pointercancel", resume);
+      el.removeEventListener("scroll", handleElementScroll);
+      el.removeEventListener("touchstart", handleUserInteraction);
+      el.removeEventListener("touchmove", handleUserInteraction);
+      el.removeEventListener("touchend", handleUserInteraction);
+      el.removeEventListener("pointerdown", handleUserInteraction);
+      el.removeEventListener("pointermove", handleUserInteraction);
+      el.removeEventListener("pointerup", handleUserInteraction);
+      el.removeEventListener("wheel", handleUserInteraction);
+      el.removeEventListener("mouseenter", handleUserInteraction);
+      el.removeEventListener("mouseleave", handleUserInteraction);
+
+      window.removeEventListener("scroll", handlePageScroll);
+      window.removeEventListener("wheel", handlePageScroll);
+      window.removeEventListener("touchmove", handlePageScroll);
     };
   }, [ref, enabled, resetKey]);
 }

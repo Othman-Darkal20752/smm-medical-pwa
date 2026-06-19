@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import "../styles/install-prompt.css";
 
+const SESSION_DISMISS_KEY = "smm-install-dismissed-session";
+
 function isStandaloneMode() {
   return (
     window.matchMedia("(display-mode: standalone)").matches ||
@@ -12,12 +14,19 @@ function isIOSDevice() {
   return /iphone|ipad|ipod/i.test(window.navigator.userAgent);
 }
 
+function isMobileBrowser() {
+  return (
+    /android|iphone|ipad|ipod/i.test(window.navigator.userAgent) ||
+    window.matchMedia("(max-width: 768px)").matches
+  );
+}
+
 function isAdminPath() {
   return window.location.pathname.startsWith("/admin");
 }
 
-function isInstallDismissed() {
-  return localStorage.getItem("smm-install-dismissed") === "true";
+function isDismissedForCurrentSession() {
+  return sessionStorage.getItem(SESSION_DISMISS_KEY) === "true";
 }
 
 export default function InstallPrompt() {
@@ -25,9 +34,10 @@ export default function InstallPrompt() {
   const [isVisible, setIsVisible] = useState(false);
   const [isInstalled, setIsInstalled] = useState(() => isStandaloneMode());
   const [isIOS] = useState(() => isIOSDevice());
+  const [isMobile] = useState(() => isMobileBrowser());
 
   useEffect(() => {
-    if (isInstalled || isAdminPath() || isInstallDismissed()) {
+    if (isInstalled || isAdminPath() || !isMobile || isDismissedForCurrentSession()) {
       return;
     }
 
@@ -41,32 +51,25 @@ export default function InstallPrompt() {
       setIsInstalled(true);
       setIsVisible(false);
       setInstallEvent(null);
+      sessionStorage.removeItem(SESSION_DISMISS_KEY);
       localStorage.removeItem("smm-install-dismissed");
     };
 
     window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
     window.addEventListener("appinstalled", handleAppInstalled);
 
-    let iosTimer = null;
-
-    if (isIOS) {
-      iosTimer = window.setTimeout(() => {
+    const fallbackTimer = window.setTimeout(() => {
+      if (!isStandaloneMode() && !isDismissedForCurrentSession()) {
         setIsVisible(true);
-      }, 1500);
-    }
+      }
+    }, 1600);
 
     return () => {
-      if (iosTimer) {
-        window.clearTimeout(iosTimer);
-      }
-
-      window.removeEventListener(
-        "beforeinstallprompt",
-        handleBeforeInstallPrompt
-      );
+      window.clearTimeout(fallbackTimer);
+      window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
       window.removeEventListener("appinstalled", handleAppInstalled);
     };
-  }, [isInstalled, isIOS]);
+  }, [isInstalled, isMobile]);
 
   const handleInstall = async () => {
     if (!installEvent) return;
@@ -82,7 +85,8 @@ export default function InstallPrompt() {
   };
 
   const handleDismiss = () => {
-    localStorage.setItem("smm-install-dismissed", "true");
+    sessionStorage.setItem(SESSION_DISMISS_KEY, "true");
+    localStorage.removeItem("smm-install-dismissed");
     setIsVisible(false);
   };
 
@@ -106,20 +110,26 @@ export default function InstallPrompt() {
       <div className="install-prompt__content">
         <h3>ثبّت تطبيق SMM</h3>
 
-        {isIOS && !installEvent ? (
+        {installEvent ? (
           <p>
-            افتح زر المشاركة في المتصفح ثم اختر
+            أضف مول صحنايا الطبي إلى الشاشة الرئيسية لتصفّح المنتجات الطبية بسرعة.
+          </p>
+        ) : isIOS ? (
+          <p>
+            افتح زر المشاركة في Safari ثم اختر
             <strong> إضافة إلى الشاشة الرئيسية </strong>
             لاستخدام الكتالوج كتطبيق.
           </p>
         ) : (
           <p>
-            أضف مول صحنايا الطبي إلى الشاشة الرئيسية لتصفّح المنتجات الطبية بسرعة.
+            من قائمة المتصفح <strong>⋮</strong> اختر
+            <strong> تثبيت التطبيق </strong>
+            أو <strong>إضافة إلى الشاشة الرئيسية</strong>.
           </p>
         )}
       </div>
 
-      {!isIOS && installEvent && (
+      {installEvent && (
         <button
           type="button"
           className="install-prompt__button"
