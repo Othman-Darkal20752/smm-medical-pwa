@@ -332,6 +332,7 @@ button {
 
 .product-row {
   display: flex;
+  align-items: stretch;
   gap: 16px;
   overflow-x: auto;
   padding-bottom: 6px;
@@ -340,10 +341,13 @@ button {
 
 .product-card {
   flex: 0 0 210px;
+  min-height: 410px;
   border-radius: 22px;
   background: #fff;
   padding: 14px;
   position: relative;
+  display: flex;
+  flex-direction: column;
   box-shadow: 0 10px 24px rgba(7, 26, 51, 0.07);
 }
 
@@ -367,12 +371,14 @@ button {
 }
 
 .product-visual {
-  height: 142px;
+  flex: 0 0 165px;
+  height: 165px;
   border-radius: 18px;
   display: grid;
   place-items: center;
   color: #fff;
   margin-bottom: 14px;
+  overflow: hidden;
 }
 
 .product-visual.red {
@@ -392,26 +398,42 @@ button {
 }
 
 .product-card h3 {
-  margin: 0 0 8px;
+  min-height: 58px;
+  margin: 0 0 6px;
   font-size: 16px;
   line-height: 1.6;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .product-card p {
-  margin: 0 0 10px;
+  min-height: 22px;
+  margin: 0 0 8px;
   color: var(--muted);
   font-size: 13px;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .product-card strong {
+  display: block;
+  min-height: 30px;
+  margin-top: auto;
   color: var(--smm-red);
   font-size: 18px;
+  line-height: 1.5;
 }
 
 .product-actions {
   display: flex;
   gap: 14px;
-  margin-top: 14px;
+  margin-top: 12px;
 }
 
 .product-actions button {
@@ -489,7 +511,7 @@ button {
 .drawer-head {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 12px;
   padding-bottom: 20px;
   border-bottom: 1px solid var(--line);
   margin-bottom: 16px;
@@ -520,7 +542,7 @@ button {
   color: var(--text);
   text-decoration: none;
   display: grid;
-  grid-template-columns: 30px 1fr 22px;
+  grid-template-columns: auto 1fr auto;
   align-items: center;
   gap: 12px;
   font-size: 18px;
@@ -613,6 +635,12 @@ button {
 
   .product-card {
     flex-basis: 190px;
+    min-height: 400px;
+  }
+
+  .product-visual {
+    flex-basis: 155px;
+    height: 155px;
   }
 
   .offer-card {
@@ -926,6 +954,7 @@ button {
   object-fit: contain;
   border-radius: 18px;
   background: #ffffff;
+  flex: 0 0 auto;
   box-shadow: 0 8px 22px rgba(7, 26, 51, 0.12);
 }
 
@@ -981,24 +1010,12 @@ button {
   white-space: nowrap;
 }
 
-.drawer-head {
-  gap: 12px;
-}
-
 .drawer-phone,
 .inline-phone {
   direction: ltr;
   unicode-bidi: isolate;
   display: inline-block;
   white-space: nowrap;
-}
-
-.drawer a {
-  grid-template-columns: auto 1fr auto;
-}
-
-.drawer-logo {
-  flex: 0 0 auto;
 }
 
 .section-link-button {
@@ -1324,6 +1341,7 @@ button {
   font-size: 13px;
   font-weight: 900;
   text-align: right;
+  display: block;
 }
 
 .payment-options button.active {
@@ -1399,10 +1417,6 @@ button {
 }
 
 /* Cart persistence and payment improvements */
-.payment-options button {
-  display: block;
-}
-
 .payment-option-content {
   display: grid;
   gap: 4px;
