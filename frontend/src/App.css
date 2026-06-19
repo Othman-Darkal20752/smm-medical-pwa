@@ -900,3 +900,62 @@ button {
     flex-direction: row;
   }
 }
+
+.brand-mark {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.brand-logo {
+  width: 42px;
+  height: 42px;
+  object-fit: contain;
+  border-radius: 14px;
+  background: #ffffff;
+}
+
+.brand-text {
+  display: grid;
+  line-height: 1.15;
+}
+
+.drawer-logo {
+  width: 54px;
+  height: 54px;
+  object-fit: contain;
+  border-radius: 18px;
+  background: #ffffff;
+  box-shadow: 0 8px 22px rgba(7, 26, 51, 0.12);
+}
+
+.hero-content {
+  min-width: 0;
+}
+
+.hero-actions {
+  margin-top: 14px;
+}
+
+.hero-actions a {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 10px 14px;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #d90416;
+  font-size: 13px;
+  font-weight: 900;
+  text-decoration: none;
+  box-shadow: 0 8px 18px rgba(7, 26, 51, 0.1);
+}
+
+.hero-icon img {
+  width: 68px;
+  height: 68px;
+  object-fit: contain;
+  border-radius: 22px;
+  background: #ffffff;
+  margin-bottom: 8px;
+}

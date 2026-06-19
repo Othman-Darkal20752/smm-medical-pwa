@@ -1,11 +1,14 @@
 import {
   Bell,
   ChevronLeft,
+  HeartPulse,
+  Home,
   MessageCircle,
   Percent,
   Store,
   X,
 } from "lucide-react";
+import { storeInfo } from "../data/storeInfo";
 
 function DrawerMenu({ onClose, onNavigate }) {
   const goTo = (id) => {
@@ -13,21 +16,46 @@ function DrawerMenu({ onClose, onNavigate }) {
     onNavigate(id);
   };
 
+  const whatsappUrl = `https://wa.me/${storeInfo.whatsappRaw}`;
+
   return (
     <div className="drawer-layer">
-      <button className="drawer-backdrop" onClick={onClose} aria-label="إغلاق" />
+      <button
+        className="drawer-backdrop"
+        type="button"
+        onClick={onClose}
+        aria-label="إغلاق"
+      />
 
       <aside className="drawer">
         <div className="drawer-head">
-          <button onClick={onClose} aria-label="إغلاق">
+          <button type="button" onClick={onClose} aria-label="إغلاق">
             <X size={24} />
           </button>
 
+          <img
+            src={storeInfo.logo}
+            alt={storeInfo.name}
+            className="drawer-logo"
+          />
+
           <div>
-            <h2>Sahnaya Medical Mall</h2>
-            <p>مول صحنايا الطبي</p>
+            <h2>{storeInfo.englishName}</h2>
+            <p>{storeInfo.name}</p>
           </div>
         </div>
+
+        <a
+          href="#home"
+          onClick={(event) => {
+            event.preventDefault();
+            goTo("home");
+          }}
+        >
+          <Home size={25} />
+          الرئيسية
+          <ChevronLeft size={20} />
+        </a>
 
         <a
           href="#store"
@@ -37,7 +65,7 @@ function DrawerMenu({ onClose, onNavigate }) {
           }}
         >
           <Store size={25} />
-          المتجر
+          المنتجات
           <ChevronLeft size={20} />
         </a>
 
@@ -66,14 +94,20 @@ function DrawerMenu({ onClose, onNavigate }) {
         </a>
 
         <a
-          href="#contact"
+          href="#best"
           onClick={(event) => {
             event.preventDefault();
-            goTo("contact");
+            goTo("store");
           }}
         >
+          <HeartPulse size={25} />
+          الأكثر طلباً
+          <ChevronLeft size={20} />
+        </a>
+
+        <a href={whatsappUrl} target="_blank" rel="noreferrer">
           <MessageCircle size={25} />
-          تواصل معنا
+          واتساب {storeInfo.whatsapp}
           <ChevronLeft size={20} />
         </a>
       </aside>

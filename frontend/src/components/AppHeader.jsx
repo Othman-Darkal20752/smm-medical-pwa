@@ -1,4 +1,5 @@
 import { Menu, Search, ShoppingCart } from "lucide-react";
+import { storeInfo } from "../data/storeInfo";
 
 function AppHeader({
   cartCount,
@@ -11,25 +12,44 @@ function AppHeader({
   return (
     <header className="top-bar">
       <div className="top-actions">
-        <button className="icon-button" aria-label="القائمة" onClick={onOpenDrawer}>
+        <button
+          className="icon-button"
+          type="button"
+          aria-label="القائمة"
+          onClick={onOpenDrawer}
+        >
           <Menu size={30} />
         </button>
 
         <div className="brand-mark">
-          <span>SMM</span>
-          <small>مول صحنايا الطبي</small>
+          <img
+            src={storeInfo.logo}
+            alt={storeInfo.name}
+            className="brand-logo"
+          />
+
+          <div className="brand-text">
+            <span>{storeInfo.shortName}</span>
+            <small>{storeInfo.name}</small>
+          </div>
         </div>
 
         <div className="header-icons">
           <button
             className="icon-button"
+            type="button"
             aria-label="بحث"
             onClick={() => searchInputRef.current?.focus()}
           >
             <Search size={29} />
           </button>
 
-          <button className="icon-button cart-icon" aria-label="السلة" onClick={onCartClick}>
+          <button
+            className="icon-button cart-icon"
+            type="button"
+            aria-label="السلة"
+            onClick={onCartClick}
+          >
             <ShoppingCart size={29} />
             <b>{cartCount}</b>
           </button>
@@ -43,7 +63,7 @@ function AppHeader({
           ref={searchInputRef}
           value={searchQuery}
           onChange={(event) => onSearchChange(event.target.value)}
-          placeholder="ابحث عن منتج طبي..."
+          placeholder="ابحث عن جهاز، مستلزم، مادة سنية..."
         />
       </div>
     </header>
