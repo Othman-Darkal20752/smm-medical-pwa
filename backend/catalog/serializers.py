@@ -21,6 +21,7 @@ class CategorySerializer(serializers.ModelSerializer):
 class ProductSerializer(serializers.ModelSerializer):
     category = CategorySerializer(read_only=True)
     category_id = serializers.IntegerField(write_only=True)
+    price_syp = serializers.SerializerMethodField()
 
     class Meta:
         model = Product
@@ -45,6 +46,9 @@ class ProductSerializer(serializers.ModelSerializer):
             "created_at",
             "updated_at",
         )
+
+    def get_price_syp(self, obj):
+        return obj.calculated_price_syp()
 
 
 class StoreSettingsSerializer(serializers.ModelSerializer):

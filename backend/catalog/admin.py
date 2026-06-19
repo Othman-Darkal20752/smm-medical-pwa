@@ -17,7 +17,7 @@ class ProductAdmin(admin.ModelAdmin):
         "name",
         "category",
         "price_usd",
-        "price_syp",
+        "calculated_price_syp",
         "stock_status",
         "is_new",
         "is_offer",
@@ -27,7 +27,6 @@ class ProductAdmin(admin.ModelAdmin):
     )
     list_editable = (
         "price_usd",
-        "price_syp",
         "stock_status",
         "is_new",
         "is_offer",

@@ -65,7 +65,6 @@ class Product(models.Model):
     image = models.ImageField(upload_to="products/", blank=True, null=True)
 
     price_usd = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
-    price_syp = models.PositiveBigIntegerField(blank=True, null=True)
     is_price_visible = models.BooleanField(default=True)
 
     stock_status = models.CharField(
@@ -91,6 +90,15 @@ class Product(models.Model):
         if not self.slug:
             self.slug = make_unique_slug(self, self.name)
         super().save(*args, **kwargs)
+
+    def calculated_price_syp(self):
+        if self.price_usd is None:
+            return None
+
+        settings = StoreSettings.load()
+        return int(round(float(self.price_usd) * settings.exchange_rate))
+
+    calculated_price_syp.short_description = "Calculated SYP"
 
     def __str__(self):
         return self.name
