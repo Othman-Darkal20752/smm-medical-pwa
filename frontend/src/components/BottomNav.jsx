@@ -1,8 +1,8 @@
-import { Home, MessageCircle, Percent, ShoppingCart, Store } from "lucide-react";
+import { Home, MessageCircle, Package, Percent, ShoppingCart } from "lucide-react";
 
 const navItems = [
   { id: "home", label: "الرئيسية", icon: Home },
-  { id: "store", label: "المتجر", icon: Store },
+  { id: "products", label: "المنتجات", icon: Package },
   { id: "offers", label: "العروض", icon: Percent },
   { id: "cart", label: "السلة", icon: ShoppingCart },
   { id: "contact", label: "تواصل", icon: MessageCircle },
@@ -17,6 +17,7 @@ function BottomNav({ activeNav, onNavigate }) {
         return (
           <button
             key={item.id}
+            type="button"
             className={activeNav === item.id ? "active" : ""}
             onClick={() => onNavigate(item.id)}
           >

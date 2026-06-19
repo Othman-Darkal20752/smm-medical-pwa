@@ -107,7 +107,9 @@ function DrawerMenu({ onClose, onNavigate }) {
 
         <a href={whatsappUrl} target="_blank" rel="noreferrer">
           <MessageCircle size={25} />
-          واتساب {storeInfo.whatsapp}
+          <span className="drawer-phone" dir="ltr">
+            {storeInfo.whatsapp}
+          </span>
           <ChevronLeft size={20} />
         </a>
       </aside>

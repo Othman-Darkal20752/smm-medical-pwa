@@ -21,17 +21,9 @@ function AppHeader({
           <Menu size={30} />
         </button>
 
-        <div className="brand-mark">
-          <img
-            src={storeInfo.logo}
-            alt={storeInfo.name}
-            className="brand-logo"
-          />
-
-          <div className="brand-text">
-            <span>{storeInfo.shortName}</span>
-            <small>{storeInfo.name}</small>
-          </div>
+        <div className="brand-mark header-brand">
+          <span>{storeInfo.shortName}</span>
+          <small>{storeInfo.name}</small>
         </div>
 
         <div className="header-icons">

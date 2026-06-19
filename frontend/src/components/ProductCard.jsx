@@ -1,24 +1,52 @@
-import { Heart, Package, ShoppingCart } from "lucide-react";
+import { Check, Heart, Package, ShoppingCart } from "lucide-react";
 
-function ProductCard({ product, isFavorite, onAddToCart, onToggleFavorite }) {
+function formatPrice(product) {
+  if (product.priceLabel) return product.priceLabel;
+  if (typeof product.price === "string") return product.price;
+  if (typeof product.priceValue === "number") {
+    return `${product.priceValue.toLocaleString("en-US")} ل.س`;
+  }
+
+  return "السعر عند الطلب";
+}
+
+function ProductCard({
+  product,
+  isFavorite,
+  isInCart,
+  cartQuantity = 0,
+  onAddToCart,
+  onToggleFavorite,
+}) {
   return (
     <article className="product-card">
       <span className={`badge ${product.tone}`}>{product.tag}</span>
 
       <div className={`product-visual ${product.tone}`}>
-        <Package size={54} />
+        {product.image ? (
+          <img src={product.image} alt={product.name} />
+        ) : (
+          <Package size={54} />
+        )}
       </div>
 
       <h3>{product.name}</h3>
       <p>{product.category}</p>
-      <strong>{product.price}</strong>
+      <strong>{formatPrice(product)}</strong>
 
       <div className="product-actions">
-        <button aria-label="إضافة للسلة" onClick={onAddToCart}>
-          <ShoppingCart size={24} />
+        <button
+          type="button"
+          className={isInCart ? "add-cart-button is-added" : "add-cart-button"}
+          aria-label="إضافة للسلة"
+          onClick={() => onAddToCart(product)}
+        >
+          {isInCart ? <Check size={22} /> : <ShoppingCart size={22} />}
+          <span>{isInCart ? `مضاف ${cartQuantity}` : "إضافة"}</span>
         </button>
 
         <button
+          type="button"
           aria-label="المفضلة"
           className={isFavorite ? "is-favorite" : ""}
           onClick={() => onToggleFavorite(product.id)}
