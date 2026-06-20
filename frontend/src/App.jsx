@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+﻿import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ChevronLeft,
   CreditCard,
@@ -623,6 +623,8 @@ ${totalLine}
               isInCart={cartQuantity > 0}
               cartQuantity={cartQuantity}
               onAddToCart={handleAddToCart}
+              onIncreaseQuantity={increaseQuantity}
+              onDecreaseQuantity={decreaseQuantity}
               onToggleFavorite={toggleFavorite}
               exchangeRate={exchangeRate}
             />
@@ -706,6 +708,8 @@ ${totalLine}
                 isInCart={cartQuantity > 0}
                 cartQuantity={cartQuantity}
                 onAddToCart={handleAddToCart}
+                onIncreaseQuantity={increaseQuantity}
+                onDecreaseQuantity={decreaseQuantity}
                 onToggleFavorite={toggleFavorite}
                 exchangeRate={exchangeRate}
               />
@@ -735,6 +739,8 @@ ${totalLine}
                 isInCart={cartQuantity > 0}
                 cartQuantity={cartQuantity}
                 onAddToCart={handleAddToCart}
+                onIncreaseQuantity={increaseQuantity}
+                onDecreaseQuantity={decreaseQuantity}
                 onToggleFavorite={toggleFavorite}
                 exchangeRate={exchangeRate}
               />

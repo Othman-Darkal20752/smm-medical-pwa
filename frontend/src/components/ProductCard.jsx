@@ -1,4 +1,4 @@
-import { Check, Heart, Package, ShoppingCart } from "lucide-react";
+import { Heart, Minus, Package, Plus, ShoppingCart } from "lucide-react";
 
 const badgeLabels = {
   offer: "عرض",
@@ -54,6 +54,8 @@ function ProductCard({
   cartQuantity = 0,
   exchangeRate = 13000,
   onAddToCart,
+  onIncreaseQuantity,
+  onDecreaseQuantity,
   onToggleFavorite,
 }) {
   const price = getPriceParts(product, exchangeRate);
@@ -101,15 +103,43 @@ function ProductCard({
           )}
         </div>
 
-        <button
-          type="button"
-          className={isInCart ? "add-cart-button is-added" : "add-cart-button"}
-          aria-label="إضافة للسلة"
-          onClick={() => onAddToCart(product)}
-        >
-          {isInCart ? <Check size={20} /> : <ShoppingCart size={20} />}
-          <span>{isInCart ? `مضاف ${cartQuantity}` : "أضف للسلة"}</span>
-        </button>
+        {isInCart ? (
+          <div
+            className="add-cart-button is-added cart-quantity-control"
+            role="group"
+            aria-label={`كمية ${product.name} في السلة`}
+          >
+            <button
+              type="button"
+              className="quantity-control-button"
+              aria-label="زيادة الكمية"
+              onClick={() => onIncreaseQuantity(product.id)}
+            >
+              <Plus size={18} />
+            </button>
+
+            <span className="quantity-control-value">{cartQuantity}</span>
+
+            <button
+              type="button"
+              className="quantity-control-button"
+              aria-label="إنقاص الكمية"
+              onClick={() => onDecreaseQuantity(product.id)}
+            >
+              <Minus size={18} />
+            </button>
+          </div>
+        ) : (
+          <button
+            type="button"
+            className="add-cart-button"
+            aria-label="إضافة للسلة"
+            onClick={() => onAddToCart(product)}
+          >
+            <ShoppingCart size={20} />
+            <span>أضف للسلة</span>
+          </button>
+        )}
       </div>
     </article>
   );
