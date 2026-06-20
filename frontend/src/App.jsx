@@ -35,6 +35,10 @@ import AdminDashboard from "./pages/AdminDashboard";
 const CART_STORAGE_KEY = "smm_medical_cart";
 const SHAM_CASH_QR_SRC = "/payments/sham-cash-qr.png";
 const DEFAULT_EXCHANGE_RATE = 13000;
+const STORE_MAP_URL = "https://maps.app.goo.gl/ven1Hxt3oZudRRtD7?g_st=aw";
+const STORE_LOCATION_TEXT = "صحنايا، سوريا - C6FF+2MG";
+const STORE_FOOTER_DESCRIPTION =
+  "مول صحنايا الطبي يوفر مستلزمات طبية متنوعة للطبيب والمريض، تشمل أجهزة السكر والضغط، القثاطر، السرنجات، أجهزة التجميل، المشدات، النظارات، المواد السنية، وكافة التجهيزات الطبية.";
 
 const paymentMethods = [
   {
@@ -1095,26 +1099,41 @@ ${totalLine}
       <main className="content app-page-content">{renderPage()}</main>
 
       <footer className="site-footer">
-        <div>
-          <img src={storeInfo.logo} alt={storeInfo.name} />
-          <p>{storeInfo.description}</p>
-        </div>
+  <div>
+    <img src={storeInfo.logo} alt={storeInfo.name} />
+    <p>{STORE_FOOTER_DESCRIPTION}</p>
+  </div>
 
-        <nav>
-          <strong>التصفح</strong>
-          <button type="button" onClick={() => handlePageChange("home")}>الرئيسية</button>
-          <button type="button" onClick={() => handlePageChange("products")}>المنتجات</button>
-          <button type="button" onClick={() => handlePageChange("offers")}>العروض</button>
-          <button type="button" onClick={() => handlePageChange("contact")}>تواصل معنا</button>
-        </nav>
+  <nav>
+    <strong>التصفح</strong>
+    <button type="button" onClick={() => handlePageChange("home")}>
+      الرئيسية
+    </button>
+    <button type="button" onClick={() => handlePageChange("products")}>
+      المنتجات
+    </button>
+    <button type="button" onClick={() => handlePageChange("offers")}>
+      العروض
+    </button>
+    <button type="button" onClick={() => handlePageChange("contact")}>
+      تواصل معنا
+    </button>
+  </nav>
 
-        <nav>
-          <strong>تواصل معنا</strong>
-          <span>{storeInfo.location}</span>
-          <span dir="ltr">{storeInfo.whatsapp}</span>
-          <a href={whatsappUrl} target="_blank" rel="noreferrer">واتساب</a>
-        </nav>
-      </footer>
+  <nav>
+    <strong>معلومات التواصل</strong>
+    <span>{STORE_LOCATION_TEXT}</span>
+    <span dir="ltr">{storeInfo.whatsapp}</span>
+
+    <a href={STORE_MAP_URL} target="_blank" rel="noreferrer">
+      الموقع على الخريطة
+    </a>
+
+    <a href={whatsappUrl} target="_blank" rel="noreferrer">
+      واتساب
+    </a>
+  </nav>
+</footer>
 
       <BottomNav activeNav={activePage} onNavigate={handleNavClick} />
 
