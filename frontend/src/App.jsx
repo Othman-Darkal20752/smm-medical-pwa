@@ -376,11 +376,11 @@ function App() {
   }, []);
 
   const autoScrollProducts = useMemo(() => {
-    return [...newProducts, ...newProducts];
+    return newProducts;
   }, [newProducts]);
 
   const autoScrollBestSellers = useMemo(() => {
-    return [...bestSellerProducts, ...bestSellerProducts];
+    return bestSellerProducts;
   }, [bestSellerProducts]);
 
   useAutoHorizontalScroll(
