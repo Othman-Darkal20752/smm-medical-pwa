@@ -137,3 +137,5 @@ REST_FRAMEWORK = {
         "rest_framework.renderers.BrowsableAPIRenderer",
     ],
 }
+
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
