@@ -16,6 +16,8 @@ import { categories } from "./data/categories";
 import { offers } from "./data/offers";
 import { products as initialProducts } from "./data/products";
 
+import { fetchCategories, fetchProducts, fetchSiteSettings } from "./services/api";
+
 import { useAutoHorizontalScroll } from "./hooks/useAutoHorizontalScroll";
 
 import AppHeader from "./components/AppHeader";
@@ -61,22 +63,41 @@ const getProductsPageSize = () => {
 
 function getProductPriceValue(product) {
   if (typeof product.priceValue === "number") return product.priceValue;
+  if (typeof product.priceSyp === "number") return product.priceSyp;
   if (typeof product.price === "number") return product.price;
+
+  return null;
+}
+
+function getProductUsdValue(product, exchangeRate = DEFAULT_EXCHANGE_RATE) {
+  if (typeof product.priceUsd === "number") return product.priceUsd;
+
+  const priceValue = getProductPriceValue(product);
+
+  if (priceValue !== null) {
+    const safeRate = exchangeRate > 0 ? exchangeRate : DEFAULT_EXCHANGE_RATE;
+    return priceValue / safeRate;
+  }
 
   return null;
 }
 
 function getProductPriceLabel(product, exchangeRate = DEFAULT_EXCHANGE_RATE) {
   const priceValue = getProductPriceValue(product);
+  const usdValue = getProductUsdValue(product, exchangeRate);
 
-  if (priceValue !== null) {
-    const safeRate = exchangeRate > 0 ? exchangeRate : DEFAULT_EXCHANGE_RATE;
-    const usdValue = priceValue / safeRate;
-
-    return `$${usdValue.toLocaleString("en-US", {
+  if (usdValue !== null && priceValue !== null) {
+    return `${usdValue.toLocaleString("en-US", {
       minimumFractionDigits: usdValue < 10 ? 2 : 0,
       maximumFractionDigits: 2,
     })} · ${priceValue.toLocaleString("en-US")} ل.س`;
+  }
+
+  if (usdValue !== null) {
+    return `${usdValue.toLocaleString("en-US", {
+      minimumFractionDigits: usdValue < 10 ? 2 : 0,
+      maximumFractionDigits: 2,
+    })}`;
   }
 
   if (product.priceLabel) return product.priceLabel;
@@ -125,6 +146,7 @@ function isInstallSupportedDevice() {
 function App() {
   const [currentPath, setCurrentPath] = useState(() => window.location.pathname);
 
+  const [categoryList, setCategoryList] = useState(categories);
   const [productList, setProductList] = useState(initialProducts);
   const [activePage, setActivePage] = useState("home");
   const [activeCategory, setActiveCategory] = useState("الكل");
@@ -158,6 +180,52 @@ function App() {
   const searchInputRef = useRef(null);
 
   const whatsappUrl = `https://wa.me/${storeInfo.whatsappRaw}`;
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadBackendCatalog() {
+      try {
+        const [settingsData, backendCategories, backendProducts] =
+          await Promise.all([
+            fetchSiteSettings(),
+            fetchCategories(),
+            fetchProducts({ page_size: 60 }),
+          ]);
+
+        if (cancelled) return;
+
+        if (Array.isArray(backendCategories) && backendCategories.length > 0) {
+          setCategoryList(backendCategories);
+        }
+
+        if (
+          backendProducts &&
+          Array.isArray(backendProducts.products) &&
+          backendProducts.products.length > 0
+        ) {
+          setProductList(backendProducts.products);
+        }
+
+        const backendExchangeRate = Number(settingsData?.store?.exchange_rate);
+
+        if (
+          Number.isFinite(backendExchangeRate) &&
+          backendExchangeRate > 0
+        ) {
+          setExchangeRate(backendExchangeRate);
+        }
+      } catch (error) {
+        console.warn("Using local fallback catalog data:", error);
+      }
+    }
+
+    loadBackendCatalog();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useEffect(() => {
     const handlePopState = () => {
@@ -258,8 +326,8 @@ function App() {
   };
 
   const categoryOptions = useMemo(() => {
-    return categories.filter((category) => category !== "الكل");
-  }, []);
+    return categoryList.filter((category) => category !== "الكل");
+  }, [categoryList]);
 
   const filteredProducts = useMemo(() => {
     return productList.filter((product) => {
@@ -569,7 +637,7 @@ ${totalLine}
       <HomeHero onBrowseProducts={() => handlePageChange("products")} />
 
       <CategoryStrip
-        categories={categories}
+        categories={categoryList}
         activeCategory={activeCategory}
         onChange={handleCategoryChange}
       />
@@ -696,7 +764,7 @@ ${totalLine}
       </section>
 
       <CategoryStrip
-        categories={categories}
+        categories={categoryList}
         activeCategory={activeCategory}
         onChange={handleCategoryChange}
       />
