@@ -47,6 +47,19 @@ function getPriceParts(product, exchangeRate) {
   };
 }
 
+function getVersionedImageUrl(product) {
+  if (!product.image) return "";
+
+  if (product.image.startsWith("data:") || product.image.startsWith("blob:")) {
+    return product.image;
+  }
+
+  const version = product.updated_at || product.updatedAt || product.id || "1";
+  const separator = product.image.includes("?") ? "&" : "?";
+
+  return `${product.image}${separator}v=${encodeURIComponent(version)}`;
+}
+
 function ProductCard({
   product,
   isFavorite,
@@ -60,6 +73,7 @@ function ProductCard({
 }) {
   const price = getPriceParts(product, exchangeRate);
   const badges = getProductBadges(product);
+  const imageUrl = getVersionedImageUrl(product);
 
   return (
     <article className={`product-card premium-product-card tone-${product.tone}`}>
@@ -81,8 +95,8 @@ function ProductCard({
           <Heart size={20} />
         </button>
 
-        {product.image ? (
-          <img src={product.image} alt={product.name} />
+        {imageUrl ? (
+          <img src={imageUrl} alt={product.name} loading="lazy" />
         ) : (
           <Package size={62} />
         )}
@@ -104,18 +118,14 @@ function ProductCard({
         </div>
 
         {isInCart ? (
-          <div
-            className="add-cart-button is-added cart-quantity-control"
-            role="group"
-            aria-label={`كمية ${product.name} في السلة`}
-          >
+          <div className="add-cart-button is-added cart-quantity-control" aria-label="التحكم بكمية المنتج">
             <button
               type="button"
               className="quantity-control-button"
-              aria-label="زيادة الكمية"
-              onClick={() => onIncreaseQuantity(product.id)}
+              aria-label="إنقاص الكمية"
+              onClick={() => onDecreaseQuantity?.(product.id)}
             >
-              <Plus size={18} />
+              <Minus size={18} />
             </button>
 
             <span className="quantity-control-value">{cartQuantity}</span>
@@ -123,10 +133,10 @@ function ProductCard({
             <button
               type="button"
               className="quantity-control-button"
-              aria-label="إنقاص الكمية"
-              onClick={() => onDecreaseQuantity(product.id)}
+              aria-label="زيادة الكمية"
+              onClick={() => (onIncreaseQuantity ? onIncreaseQuantity(product.id) : onAddToCart(product))}
             >
-              <Minus size={18} />
+              <Plus size={18} />
             </button>
           </div>
         ) : (

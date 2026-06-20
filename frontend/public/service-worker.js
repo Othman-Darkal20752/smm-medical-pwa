@@ -1,4 +1,4 @@
-const CACHE_NAME = "smm-pwa-v3";
+const CACHE_NAME = "smm-pwa-v4";
 
 const STATIC_ASSETS = [
   "/",
@@ -31,9 +31,8 @@ self.addEventListener("activate", (event) => {
             .map((key) => caches.delete(key))
         )
       )
+      .then(() => self.clients.claim())
   );
-
-  self.clients.claim();
 });
 
 self.addEventListener("fetch", (event) => {
@@ -41,27 +40,36 @@ self.addEventListener("fetch", (event) => {
 
   if (request.method !== "GET") return;
 
+  const url = new URL(request.url);
+
+  if (url.pathname.startsWith("/api/") || url.pathname.startsWith("/media/")) {
+    event.respondWith(fetch(request));
+    return;
+  }
+
   if (request.mode === "navigate") {
-    event.respondWith(
-      fetch(request).catch(() => caches.match("/"))
-    );
+    event.respondWith(fetch(request).catch(() => caches.match("/")));
     return;
   }
 
   event.respondWith(
     caches.match(request).then((cachedResponse) => {
-      return (
-        cachedResponse ||
-        fetch(request).then((networkResponse) => {
+      if (cachedResponse) return cachedResponse;
+
+      return fetch(request).then((networkResponse) => {
+        const isStaticAsset =
+          STATIC_ASSETS.includes(url.pathname) ||
+          url.pathname.startsWith("/assets/");
+
+        if (isStaticAsset && networkResponse.ok) {
           const responseClone = networkResponse.clone();
+          caches
+            .open(CACHE_NAME)
+            .then((cache) => cache.put(request, responseClone));
+        }
 
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(request, responseClone);
-          });
-
-          return networkResponse;
-        })
-      );
+        return networkResponse;
+      });
     })
   );
 });

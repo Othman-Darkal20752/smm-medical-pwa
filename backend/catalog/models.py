@@ -1,6 +1,46 @@
+from io import BytesIO
+from pathlib import Path
+from uuid import uuid4
+
+from django.core.files.base import ContentFile
 from django.db import models
 from django.utils.text import slugify
+from PIL import Image, ImageOps
 
+
+def convert_uploaded_image_to_webp(image_field, prefix="image", quality=82):
+    if not image_field or not image_field.name:
+        return None
+
+    if image_field.name.lower().endswith(".webp"):
+        return None
+
+    try:
+        image_field.file.seek(0)
+        image = Image.open(image_field.file)
+        image = ImageOps.exif_transpose(image)
+
+        if image.mode not in ("RGB", "RGBA"):
+            image = image.convert("RGB")
+
+        image.thumbnail((1400, 1400), Image.Resampling.LANCZOS)
+
+        buffer = BytesIO()
+        save_kwargs = {"format": "WEBP", "quality": quality, "method": 6}
+        if image.mode == "RGBA":
+            save_kwargs["lossless"] = False
+
+        image.save(buffer, **save_kwargs)
+        buffer.seek(0)
+
+        base_name = Path(image_field.name).stem or prefix
+        safe_name = slugify(base_name, allow_unicode=True) or prefix
+        file_name = f"{safe_name}-{uuid4().hex[:8]}.webp"
+
+        return ContentFile(buffer.getvalue(), name=file_name)
+    except Exception:
+        image_field.file.seek(0)
+        return None
 
 def make_unique_slug(instance, value):
     base_slug = slugify(value, allow_unicode=True) or "item"
@@ -89,6 +129,11 @@ class Product(models.Model):
     def save(self, *args, **kwargs):
         if not self.slug:
             self.slug = make_unique_slug(self, self.name)
+
+        converted_image = convert_uploaded_image_to_webp(self.image, prefix="product")
+        if converted_image is not None:
+            self.image = converted_image
+
         super().save(*args, **kwargs)
 
     def calculated_price_syp(self):
