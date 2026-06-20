@@ -2,6 +2,10 @@ from django.contrib import admin
 
 from .models import Category, HeroSlide, PaymentSettings, Product, StoreSettings
 
+admin.site.site_header = "لوحة إدارة مول صحنايا الطبي"
+admin.site.site_title = "إدارة SMM"
+admin.site.index_title = "إدارة محتوى الموقع"
+
 
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
@@ -9,6 +13,7 @@ class CategoryAdmin(admin.ModelAdmin):
     list_editable = ("order", "is_active")
     search_fields = ("name", "slug")
     list_filter = ("is_active",)
+    ordering = ("order", "name")
 
 
 @admin.register(Product)
@@ -43,12 +48,47 @@ class ProductAdmin(admin.ModelAdmin):
         "is_best_seller",
         "is_active",
     )
+    ordering = ("order", "-created_at")
+    readonly_fields = ("created_at", "updated_at", "calculated_price_syp")
+    fieldsets = (
+        ("معلومات المنتج", {
+            "fields": (
+                "category",
+                "name",
+                "slug",
+                "description",
+                "image",
+            )
+        }),
+        ("السعر والتوفر", {
+            "fields": (
+                "price_usd",
+                "calculated_price_syp",
+                "is_price_visible",
+                "stock_status",
+            )
+        }),
+        ("إعدادات الظهور", {
+            "fields": (
+                "color",
+                "is_new",
+                "is_offer",
+                "is_best_seller",
+                "is_active",
+                "order",
+            )
+        }),
+        ("معلومات النظام", {
+            "fields": ("created_at", "updated_at"),
+            "classes": ("collapse",),
+        }),
+    )
 
 
 @admin.register(StoreSettings)
 class StoreSettingsAdmin(admin.ModelAdmin):
     fieldsets = (
-        ("Brand", {
+        ("هوية المتجر", {
             "fields": (
                 "site_name",
                 "english_name",
@@ -57,14 +97,14 @@ class StoreSettingsAdmin(admin.ModelAdmin):
                 "logo",
             )
         }),
-        ("Contact", {
+        ("معلومات التواصل", {
             "fields": (
                 "whatsapp_number",
                 "location",
                 "address",
             )
         }),
-        ("Catalog", {
+        ("إعدادات الكتالوج", {
             "fields": (
                 "exchange_rate",
                 "products_page_size",
@@ -79,13 +119,13 @@ class StoreSettingsAdmin(admin.ModelAdmin):
 @admin.register(PaymentSettings)
 class PaymentSettingsAdmin(admin.ModelAdmin):
     fieldsets = (
-        ("Cash", {
+        ("الدفع عند الاستلام", {
             "fields": (
                 "cash_enabled",
                 "cash_description",
             )
         }),
-        ("Sham Cash", {
+        ("شام كاش", {
             "fields": (
                 "sham_cash_enabled",
                 "sham_cash_label",
@@ -93,7 +133,7 @@ class PaymentSettingsAdmin(admin.ModelAdmin):
                 "sham_cash_qr",
             )
         }),
-        ("WhatsApp", {
+        ("واتساب", {
             "fields": (
                 "whatsapp_enabled",
                 "whatsapp_description",
@@ -111,3 +151,25 @@ class HeroSlideAdmin(admin.ModelAdmin):
     list_editable = ("order", "is_active")
     search_fields = ("title", "eyebrow", "text")
     list_filter = ("is_active",)
+    ordering = ("order", "id")
+    fieldsets = (
+        ("محتوى الشريحة", {
+            "fields": (
+                "eyebrow",
+                "title",
+                "text",
+            )
+        }),
+        ("الصور", {
+            "fields": (
+                "desktop_image",
+                "mobile_image",
+            )
+        }),
+        ("إعدادات الظهور", {
+            "fields": (
+                "order",
+                "is_active",
+            )
+        }),
+    )
