@@ -40,6 +40,10 @@ const STORE_LOCATION_TEXT = "صحنايا، سوريا - C6FF+2MG";
 const STORE_FOOTER_DESCRIPTION =
   "مول صحنايا الطبي يوفر مستلزمات طبية متنوعة للطبيب والمريض، تشمل أجهزة السكر والضغط، القثاطر، السرنجات، أجهزة التجميل، المشدات، النظارات، المواد السنية، وكافة التجهيزات الطبية.";
 
+const INSTALL_INSTALLED_KEY = "smm_pwa_installed";
+const INSTALL_DISMISSED_UNTIL_KEY = "smm_pwa_dismissed_until";
+const INSTALL_REMINDER_HOURS = 24;
+
 const paymentMethods = [
   {
     id: "cash",
@@ -147,6 +151,36 @@ function isInstallSupportedDevice() {
   );
 }
 
+function isInstallMarkedInstalled() {
+  return localStorage.getItem(INSTALL_INSTALLED_KEY) === "true";
+}
+
+function markInstallCompleted() {
+  localStorage.setItem(INSTALL_INSTALLED_KEY, "true");
+  localStorage.removeItem(INSTALL_DISMISSED_UNTIL_KEY);
+}
+
+function shouldShowInstallPrompt() {
+  if (isStandaloneMode() || isInstallMarkedInstalled()) {
+    return false;
+  }
+
+  const dismissedUntil = Number(localStorage.getItem(INSTALL_DISMISSED_UNTIL_KEY));
+
+  if (!Number.isFinite(dismissedUntil)) {
+    return true;
+  }
+
+  return Date.now() > dismissedUntil;
+}
+
+function snoozeInstallPrompt(hours = INSTALL_REMINDER_HOURS) {
+  localStorage.setItem(
+    INSTALL_DISMISSED_UNTIL_KEY,
+    String(Date.now() + hours * 60 * 60 * 1000)
+  );
+}
+
 function App() {
   const [currentPath, setCurrentPath] = useState(() => window.location.pathname);
 
@@ -175,7 +209,7 @@ function App() {
   const [installEvent, setInstallEvent] = useState(null);
   const [installHelpOpen, setInstallHelpOpen] = useState(false);
   const [isStandaloneApp, setIsStandaloneApp] = useState(() =>
-    isStandaloneMode()
+    isStandaloneMode() || isInstallMarkedInstalled()
   );
 
   const offerRowRef = useRef(null);
@@ -244,26 +278,26 @@ function App() {
   }, []);
 
   useEffect(() => {
-    const cleanupOldInstallStorage = () => {
-      localStorage.removeItem("smm-install-dismissed");
-      localStorage.removeItem("smm-install-dismissed-until");
-      localStorage.removeItem("smm-install-completed");
-      sessionStorage.removeItem("smm-install-dismissed-session");
-    };
-
-    cleanupOldInstallStorage();
-
     const handleBeforeInstallPrompt = (event) => {
       event.preventDefault();
 
-      if (isStandaloneMode()) {
+      if (isStandaloneMode() || isInstallMarkedInstalled()) {
         return;
       }
 
       setInstallEvent(event);
+
+      if (shouldShowInstallPrompt()) {
+        window.setTimeout(() => {
+          if (shouldShowInstallPrompt()) {
+            setInstallHelpOpen(true);
+          }
+        }, 1200);
+      }
     };
 
     const handleAppInstalled = () => {
+      markInstallCompleted();
       setInstallEvent(null);
       setInstallHelpOpen(false);
       setIsStandaloneApp(true);
@@ -272,7 +306,14 @@ function App() {
     const displayModeQuery = window.matchMedia("(display-mode: standalone)");
 
     const handleDisplayModeChange = () => {
-      setIsStandaloneApp(isStandaloneMode());
+      const isStandalone = isStandaloneMode();
+
+      setIsStandaloneApp(isStandalone || isInstallMarkedInstalled());
+
+      if (isStandalone) {
+        markInstallCompleted();
+        setInstallHelpOpen(false);
+      }
     };
 
     window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
@@ -298,6 +339,26 @@ function App() {
       }
     };
   }, []);
+
+  useEffect(() => {
+    if (isStandaloneApp || !isInstallSupportedDevice()) {
+      return undefined;
+    }
+
+    if (!shouldShowInstallPrompt()) {
+      return undefined;
+    }
+
+    const promptTimer = window.setTimeout(() => {
+      if (!isStandaloneMode() && shouldShowInstallPrompt()) {
+        setInstallHelpOpen(true);
+      }
+    }, installEvent ? 1600 : 2600);
+
+    return () => {
+      window.clearTimeout(promptTimer);
+    };
+  }, [installEvent, isStandaloneApp]);
 
   useEffect(() => {
     localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cartItems));
@@ -485,8 +546,15 @@ ${totalLine}
     setTheme((currentTheme) => (currentTheme === "dark" ? "light" : "dark"));
   };
 
+  const handleInstallPromptClose = () => {
+    snoozeInstallPrompt();
+    setInstallHelpOpen(false);
+  };
+
   const handleInstallApp = async () => {
     if (isStandaloneMode() || isStandaloneApp) {
+      markInstallCompleted();
+      setIsStandaloneApp(true);
       setInstallHelpOpen(false);
       return;
     }
@@ -504,6 +572,7 @@ ${totalLine}
       setInstallEvent(null);
 
       if (result.outcome === "accepted") {
+        markInstallCompleted();
         setIsStandaloneApp(true);
         setInstallHelpOpen(false);
         return;
@@ -1147,8 +1216,10 @@ ${totalLine}
       )}
 
       <InstallPrompt
-        isOpen={installHelpOpen}
-        onClose={() => setInstallHelpOpen(false)}
+        isOpen={installHelpOpen && !isStandaloneApp}
+        canInstall={Boolean(installEvent)}
+        onInstall={handleInstallApp}
+        onClose={handleInstallPromptClose}
       />
     </div>
   );

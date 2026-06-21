@@ -71,7 +71,8 @@
 }
 
 .install-prompt__button {
-  min-width: 64px;
+  min-width: 72px;
+  white-space: nowrap;
   height: 38px;
   border: 0;
   border-radius: 14px;
