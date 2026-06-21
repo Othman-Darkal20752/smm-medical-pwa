@@ -118,12 +118,19 @@ function ProductCard({
         </div>
 
         {isInCart ? (
-          <div className="add-cart-button is-added cart-quantity-control" aria-label="التحكم بكمية المنتج">
+          <div
+            className="add-cart-button is-added cart-quantity-control"
+            role="group"
+            aria-label={`تعديل كمية ${product.name}`}
+          >
             <button
               type="button"
-              className="quantity-control-button"
+              className="quantity-control-button quantity-control-button--minus"
               aria-label="إنقاص الكمية"
-              onClick={() => onDecreaseQuantity?.(product.id)}
+              onClick={(event) => {
+                event.stopPropagation();
+                onDecreaseQuantity?.(product.id);
+              }}
             >
               <Minus size={18} />
             </button>
@@ -132,9 +139,17 @@ function ProductCard({
 
             <button
               type="button"
-              className="quantity-control-button"
+              className="quantity-control-button quantity-control-button--plus"
               aria-label="زيادة الكمية"
-              onClick={() => (onIncreaseQuantity ? onIncreaseQuantity(product.id) : onAddToCart(product))}
+              onClick={(event) => {
+                event.stopPropagation();
+                if (onIncreaseQuantity) {
+                  onIncreaseQuantity(product.id);
+                  return;
+                }
+
+                onAddToCart(product);
+              }}
             >
               <Plus size={18} />
             </button>

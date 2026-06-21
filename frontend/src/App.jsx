@@ -36,13 +36,13 @@ const CART_STORAGE_KEY = "smm_medical_cart";
 const SHAM_CASH_QR_SRC = "/payments/sham-cash-qr.png";
 const DEFAULT_EXCHANGE_RATE = 13000;
 const STORE_MAP_URL = "https://maps.app.goo.gl/ven1Hxt3oZudRRtD7?g_st=aw";
+const STORE_FACEBOOK_URL =
+  "https://www.facebook.com/people/%D9%85%D9%88%D9%84-%D8%B5%D8%AD%D9%86%D8%A7%D9%8A%D8%A7-%D8%A7%D9%84%D8%B7%D8%A8%D9%8A/61582001177795/";
 const STORE_LOCATION_TEXT = "صحنايا، سوريا - C6FF+2MG";
+const STORE_SHIPPING_TEXT = "شحن لكافة المحافظات السورية";
 const STORE_FOOTER_DESCRIPTION =
   "مول صحنايا الطبي يوفر مستلزمات طبية متنوعة للطبيب والمريض، تشمل أجهزة السكر والضغط، القثاطر، السرنجات، أجهزة التجميل، المشدات، النظارات، المواد السنية، وكافة التجهيزات الطبية.";
 
-const INSTALL_INSTALLED_KEY = "smm_pwa_installed";
-const INSTALL_DISMISSED_UNTIL_KEY = "smm_pwa_dismissed_until";
-const INSTALL_REMINDER_HOURS = 24;
 
 const paymentMethods = [
   {
@@ -118,6 +118,13 @@ function formatPrice(value) {
   return `${value.toLocaleString("en-US")} ل.س`;
 }
 
+function formatUsd(value) {
+  return `$${value.toLocaleString("en-US", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })}`;
+}
+
 function readStoredCartItems() {
   try {
     const storedCart = JSON.parse(localStorage.getItem(CART_STORAGE_KEY) || "[]");
@@ -151,36 +158,6 @@ function isInstallSupportedDevice() {
   );
 }
 
-function isInstallMarkedInstalled() {
-  return localStorage.getItem(INSTALL_INSTALLED_KEY) === "true";
-}
-
-function markInstallCompleted() {
-  localStorage.setItem(INSTALL_INSTALLED_KEY, "true");
-  localStorage.removeItem(INSTALL_DISMISSED_UNTIL_KEY);
-}
-
-function shouldShowInstallPrompt() {
-  if (isStandaloneMode() || isInstallMarkedInstalled()) {
-    return false;
-  }
-
-  const dismissedUntil = Number(localStorage.getItem(INSTALL_DISMISSED_UNTIL_KEY));
-
-  if (!Number.isFinite(dismissedUntil)) {
-    return true;
-  }
-
-  return Date.now() > dismissedUntil;
-}
-
-function snoozeInstallPrompt(hours = INSTALL_REMINDER_HOURS) {
-  localStorage.setItem(
-    INSTALL_DISMISSED_UNTIL_KEY,
-    String(Date.now() + hours * 60 * 60 * 1000)
-  );
-}
-
 function App() {
   const [currentPath, setCurrentPath] = useState(() => window.location.pathname);
 
@@ -209,7 +186,7 @@ function App() {
   const [installEvent, setInstallEvent] = useState(null);
   const [installHelpOpen, setInstallHelpOpen] = useState(false);
   const [isStandaloneApp, setIsStandaloneApp] = useState(() =>
-    isStandaloneMode() || isInstallMarkedInstalled()
+    isStandaloneMode()
   );
 
   const offerRowRef = useRef(null);
@@ -278,26 +255,26 @@ function App() {
   }, []);
 
   useEffect(() => {
+    const cleanupOldInstallStorage = () => {
+      localStorage.removeItem("smm-install-dismissed");
+      localStorage.removeItem("smm-install-dismissed-until");
+      localStorage.removeItem("smm-install-completed");
+      sessionStorage.removeItem("smm-install-dismissed-session");
+    };
+
+    cleanupOldInstallStorage();
+
     const handleBeforeInstallPrompt = (event) => {
       event.preventDefault();
 
-      if (isStandaloneMode() || isInstallMarkedInstalled()) {
+      if (isStandaloneMode()) {
         return;
       }
 
       setInstallEvent(event);
-
-      if (shouldShowInstallPrompt()) {
-        window.setTimeout(() => {
-          if (shouldShowInstallPrompt()) {
-            setInstallHelpOpen(true);
-          }
-        }, 1200);
-      }
     };
 
     const handleAppInstalled = () => {
-      markInstallCompleted();
       setInstallEvent(null);
       setInstallHelpOpen(false);
       setIsStandaloneApp(true);
@@ -306,14 +283,7 @@ function App() {
     const displayModeQuery = window.matchMedia("(display-mode: standalone)");
 
     const handleDisplayModeChange = () => {
-      const isStandalone = isStandaloneMode();
-
-      setIsStandaloneApp(isStandalone || isInstallMarkedInstalled());
-
-      if (isStandalone) {
-        markInstallCompleted();
-        setInstallHelpOpen(false);
-      }
+      setIsStandaloneApp(isStandaloneMode());
     };
 
     window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
@@ -339,26 +309,6 @@ function App() {
       }
     };
   }, []);
-
-  useEffect(() => {
-    if (isStandaloneApp || !isInstallSupportedDevice()) {
-      return undefined;
-    }
-
-    if (!shouldShowInstallPrompt()) {
-      return undefined;
-    }
-
-    const promptTimer = window.setTimeout(() => {
-      if (!isStandaloneMode() && shouldShowInstallPrompt()) {
-        setInstallHelpOpen(true);
-      }
-    }, installEvent ? 1600 : 2600);
-
-    return () => {
-      window.clearTimeout(promptTimer);
-    };
-  }, [installEvent, isStandaloneApp]);
 
   useEffect(() => {
     localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cartItems));
@@ -478,20 +428,29 @@ function App() {
         if (!product) return null;
 
         const priceValue = getProductPriceValue(product);
+        const usdValue = getProductUsdValue(product, exchangeRate);
 
         return {
           ...item,
           product,
           priceValue,
+          usdValue,
           lineTotal: priceValue !== null ? priceValue * item.quantity : null,
+          lineTotalUsd: usdValue !== null ? usdValue * item.quantity : null,
         };
       })
       .filter(Boolean);
-  }, [cartItems, productList]);
+  }, [cartItems, productList, exchangeRate]);
 
   const cartTotal = useMemo(() => {
     return cartProducts.reduce((total, item) => {
       return item.lineTotal !== null ? total + item.lineTotal : total;
+    }, 0);
+  }, [cartProducts]);
+
+  const cartTotalUsd = useMemo(() => {
+    return cartProducts.reduce((total, item) => {
+      return item.lineTotalUsd !== null ? total + item.lineTotalUsd : total;
     }, 0);
   }, [cartProducts]);
 
@@ -507,9 +466,9 @@ function App() {
     const orderLines = cartProducts
       .map((item, index) => {
         const priceLine =
-          item.priceValue !== null
-            ? `السعر: ${formatPrice(item.priceValue)}\nالمجموع: ${formatPrice(
-                item.lineTotal
+          item.usdValue !== null
+            ? `السعر: ${formatUsd(item.usdValue)}\nالمجموع: ${formatUsd(
+                item.lineTotalUsd
               )}`
             : "السعر: يتم تأكيده عبر واتساب";
 
@@ -520,8 +479,8 @@ function App() {
       .join("\n\n");
 
     const totalLine =
-      cartTotal > 0
-        ? `الإجمالي التقريبي: ${formatPrice(cartTotal)}`
+      cartTotalUsd > 0
+        ? `الإجمالي التقريبي: ${formatUsd(cartTotalUsd)}`
         : "الإجمالي: يتم تأكيده عبر واتساب";
 
     const message = `مرحباً، أريد طلب المنتجات التالية من ${storeInfo.name}:
@@ -529,7 +488,8 @@ function App() {
 ${orderLines}
 
 ${totalLine}
-طريقة الدفع: ${selectedPaymentMethod.label}${
+طريقة الدفع: ${selectedPaymentMethod.label}
+${STORE_SHIPPING_TEXT}${
       selectedPaymentMethod.id === "sham_cash"
         ? "\nملاحظة: تم اختيار الدفع عبر شام كاش، وسيتم إرسال إشعار التحويل بعد تأكيد الطلب."
         : ""
@@ -540,21 +500,14 @@ ${totalLine}
     return `https://wa.me/${storeInfo.whatsappRaw}?text=${encodeURIComponent(
       message
     )}`;
-  }, [cartProducts, cartTotal, selectedPaymentMethod]);
+  }, [cartProducts, cartTotalUsd, selectedPaymentMethod]);
 
   const handleThemeToggle = () => {
     setTheme((currentTheme) => (currentTheme === "dark" ? "light" : "dark"));
   };
 
-  const handleInstallPromptClose = () => {
-    snoozeInstallPrompt();
-    setInstallHelpOpen(false);
-  };
-
   const handleInstallApp = async () => {
     if (isStandaloneMode() || isStandaloneApp) {
-      markInstallCompleted();
-      setIsStandaloneApp(true);
       setInstallHelpOpen(false);
       return;
     }
@@ -572,7 +525,6 @@ ${totalLine}
       setInstallEvent(null);
 
       if (result.outcome === "accepted") {
-        markInstallCompleted();
         setIsStandaloneApp(true);
         setInstallHelpOpen(false);
         return;
@@ -981,7 +933,7 @@ ${totalLine}
                 <div className="cart-item-info">
                   <h3>{item.product.name}</h3>
                   <p>{item.product.category}</p>
-                  <strong>{getProductPriceLabel(item.product, exchangeRate)}</strong>
+                  <strong>{item.usdValue !== null ? formatUsd(item.usdValue) : "السعر عند الطلب"}</strong>
                 </div>
 
                 <div className="cart-item-controls">
@@ -1022,7 +974,7 @@ ${totalLine}
         <section className="section-block checkout-card">
           <div className="checkout-row">
             <span>الإجمالي التقريبي</span>
-            <strong>{cartTotal > 0 ? formatPrice(cartTotal) : "حسب الطلب"}</strong>
+            <strong>{cartTotalUsd > 0 ? formatUsd(cartTotalUsd) : "حسب الطلب"}</strong>
           </div>
 
           {hasUnpricedItems && (
@@ -1116,11 +1068,31 @@ ${totalLine}
         </div>
       </section>
 
-      <section className="section-block">
+      <section className="section-block contact-info-grid">
         <div className="contact-card">
           <div>
             <h3>العنوان</h3>
-            <p>{storeInfo.location}</p>
+            <p>{STORE_LOCATION_TEXT}</p>
+            <a href={STORE_MAP_URL} target="_blank" rel="noreferrer">
+              الموقع على الخريطة
+            </a>
+          </div>
+        </div>
+
+        <div className="contact-card">
+          <div>
+            <h3>صفحتنا على فيسبوك</h3>
+            <p>تابع أحدث المنتجات والعروض من مول صحنايا الطبي.</p>
+            <a href={STORE_FACEBOOK_URL} target="_blank" rel="noreferrer">
+              زيارة صفحة فيسبوك
+            </a>
+          </div>
+        </div>
+
+        <div className="contact-card">
+          <div>
+            <h3>الشحن</h3>
+            <p>{STORE_SHIPPING_TEXT}</p>
           </div>
         </div>
       </section>
@@ -1168,41 +1140,45 @@ ${totalLine}
       <main className="content app-page-content">{renderPage()}</main>
 
       <footer className="site-footer">
-  <div>
-    <img src={storeInfo.logo} alt={storeInfo.name} />
-    <p>{STORE_FOOTER_DESCRIPTION}</p>
-  </div>
+        <div className="site-footer__brand">
+          <img src={storeInfo.logo} alt={storeInfo.name} />
+          <p>{STORE_FOOTER_DESCRIPTION}</p>
+          <strong>{STORE_SHIPPING_TEXT}</strong>
+        </div>
 
-  <nav>
-    <strong>التصفح</strong>
-    <button type="button" onClick={() => handlePageChange("home")}>
-      الرئيسية
-    </button>
-    <button type="button" onClick={() => handlePageChange("products")}>
-      المنتجات
-    </button>
-    <button type="button" onClick={() => handlePageChange("offers")}>
-      العروض
-    </button>
-    <button type="button" onClick={() => handlePageChange("contact")}>
-      تواصل معنا
-    </button>
-  </nav>
+        <nav className="site-footer__nav">
+          <strong>التصفح</strong>
+          <button type="button" onClick={() => handlePageChange("home")}>
+            الرئيسية
+          </button>
+          <button type="button" onClick={() => handlePageChange("products")}>
+            المنتجات
+          </button>
+          <button type="button" onClick={() => handlePageChange("offers")}>
+            العروض
+          </button>
+          <button type="button" onClick={() => handlePageChange("contact")}>
+            تواصل معنا
+          </button>
+        </nav>
 
-  <nav>
-    <strong>معلومات التواصل</strong>
-    <span>{STORE_LOCATION_TEXT}</span>
-    <span dir="ltr">{storeInfo.whatsapp}</span>
-
-    <a href={STORE_MAP_URL} target="_blank" rel="noreferrer">
-      الموقع على الخريطة
-    </a>
-
-    <a href={whatsappUrl} target="_blank" rel="noreferrer">
-      واتساب
-    </a>
-  </nav>
-</footer>
+        <nav className="site-footer__contact">
+          <strong>معلومات التواصل</strong>
+          <span>{STORE_LOCATION_TEXT}</span>
+          <span dir="ltr">{storeInfo.whatsapp}</span>
+          <div className="site-footer__actions">
+            <a href={STORE_MAP_URL} target="_blank" rel="noreferrer">
+              الموقع على الخريطة
+            </a>
+            <a href={whatsappUrl} target="_blank" rel="noreferrer">
+              واتساب
+            </a>
+            <a href={STORE_FACEBOOK_URL} target="_blank" rel="noreferrer">
+              فيسبوك
+            </a>
+          </div>
+        </nav>
+      </footer>
 
       <BottomNav activeNav={activePage} onNavigate={handleNavClick} />
 
@@ -1216,10 +1192,8 @@ ${totalLine}
       )}
 
       <InstallPrompt
-        isOpen={installHelpOpen && !isStandaloneApp}
-        canInstall={Boolean(installEvent)}
-        onInstall={handleInstallApp}
-        onClose={handleInstallPromptClose}
+        isOpen={installHelpOpen}
+        onClose={() => setInstallHelpOpen(false)}
       />
     </div>
   );
