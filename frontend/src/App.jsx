@@ -29,6 +29,7 @@ import BottomNav from "./components/BottomNav";
 import DrawerMenu from "./components/DrawerMenu";
 import EmptyState from "./components/EmptyState";
 import InstallPrompt from "./components/InstallPrompt";
+import ProductDetailsPage from "./pages/ProductDetailsPage";
 
 
 const CART_STORAGE_KEY = "smm_medical_cart";
@@ -63,6 +64,18 @@ const paymentMethods = [
 ];
 
 const DEFAULT_PAYMENT_METHOD = paymentMethods[0].id;
+
+function getProductIdFromPath(pathname) {
+  const match = pathname.match(/^\/products\/([^/]+)\/?$/);
+
+  if (!match) return null;
+
+  try {
+    return decodeURIComponent(match[1]);
+  } catch {
+    return match[1];
+  }
+}
 
 const getProductsPageSize = () => {
   return window.matchMedia("(min-width: 900px)").matches ? 20 : 8;
@@ -162,7 +175,9 @@ function App() {
 
   const [categoryList, setCategoryList] = useState(categories);
   const [productList, setProductList] = useState(initialProducts);
-  const [activePage, setActivePage] = useState("home");
+  const [activePage, setActivePage] = useState(() =>
+    getProductIdFromPath(window.location.pathname) ? "products" : "home"
+  );
   const [activeCategory, setActiveCategory] = useState("الكل");
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -242,8 +257,14 @@ function App() {
   }, []);
 
   useEffect(() => {
-    const handlePopState = () => {
+    const handlePopState = (event) => {
       setCurrentPath(window.location.pathname);
+      setActivePage(
+        getProductIdFromPath(window.location.pathname)
+          ? "products"
+          : event.state?.activePage || "home"
+      );
+      window.scrollTo({ top: 0, behavior: "auto" });
     };
 
     window.addEventListener("popstate", handlePopState);
@@ -328,13 +349,15 @@ function App() {
     }
   }, [activePage, activeCategory, searchQuery]);
 
-  const navigateToPath = (path) => {
-    window.history.pushState(null, "", path);
+  const navigateToPath = (path, nextPage = "home") => {
+    window.history.replaceState(
+      { activePage },
+      "",
+      window.location.pathname
+    );
+    window.history.pushState({ activePage: nextPage }, "", path);
     setCurrentPath(path);
-
-    if (!path.startsWith("/admin")) {
-      setActivePage("home");
-    }
+    setActivePage(nextPage);
 
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
@@ -537,6 +560,12 @@ ${STORE_SHIPPING_TEXT}${
   };
 
   const handlePageChange = (page) => {
+    if (getProductIdFromPath(currentPath)) {
+      navigateToPath("/", page);
+      setDrawerOpen(false);
+      return;
+    }
+
     setActivePage(page);
     setDrawerOpen(false);
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -564,6 +593,16 @@ ${STORE_SHIPPING_TEXT}${
     setActiveCategory(category);
     setActivePage("products");
     window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const handleOpenProduct = (product) => {
+    if (product?.id === undefined || product?.id === null) return;
+
+    setDrawerOpen(false);
+    navigateToPath(
+      `/products/${encodeURIComponent(String(product.id))}`,
+      "products"
+    );
   };
 
   const handleAddToCart = (product) => {
@@ -650,6 +689,7 @@ ${STORE_SHIPPING_TEXT}${
               onIncreaseQuantity={increaseQuantity}
               onDecreaseQuantity={decreaseQuantity}
               onToggleFavorite={toggleFavorite}
+              onOpenProduct={handleOpenProduct}
               exchangeRate={exchangeRate}
             />
           );
@@ -735,6 +775,7 @@ ${STORE_SHIPPING_TEXT}${
                 onIncreaseQuantity={increaseQuantity}
                 onDecreaseQuantity={decreaseQuantity}
                 onToggleFavorite={toggleFavorite}
+                onOpenProduct={handleOpenProduct}
                 exchangeRate={exchangeRate}
               />
             );
@@ -766,6 +807,7 @@ ${STORE_SHIPPING_TEXT}${
                 onIncreaseQuantity={increaseQuantity}
                 onDecreaseQuantity={decreaseQuantity}
                 onToggleFavorite={toggleFavorite}
+                onOpenProduct={handleOpenProduct}
                 exchangeRate={exchangeRate}
               />
             );
@@ -1099,6 +1141,43 @@ ${STORE_SHIPPING_TEXT}${
   );
 
   const renderPage = () => {
+    const productId = getProductIdFromPath(currentPath);
+
+    if (productId !== null) {
+      const product = productList.find(
+        (entry) => String(entry.id) === String(productId)
+      );
+      const similarProducts = product
+        ? productList
+            .filter(
+              (entry) =>
+                entry.category === product.category &&
+                String(entry.id) !== String(product.id)
+            )
+            .slice(0, 4)
+        : [];
+
+      return (
+        <ProductDetailsPage
+          product={product}
+          similarProducts={similarProducts}
+          exchangeRate={exchangeRate}
+          cartQuantity={product ? getCartQuantity(product.id) : 0}
+          isFavorite={product ? favoriteIds.includes(product.id) : false}
+          onAddToCart={handleAddToCart}
+          onIncreaseQuantity={increaseQuantity}
+          onDecreaseQuantity={decreaseQuantity}
+          onToggleFavorite={toggleFavorite}
+          onOpenProduct={handleOpenProduct}
+          getCartQuantity={getCartQuantity}
+          favoriteIds={favoriteIds}
+          whatsappRaw={storeInfo.whatsappRaw}
+          storeName={storeInfo.name}
+          onBackToProducts={() => handlePageChange("products")}
+        />
+      );
+    }
+
     if (activePage === "products") return renderProductsPage();
     if (activePage === "offers") return renderOffersPage();
     if (activePage === "cart") return renderCartPage();

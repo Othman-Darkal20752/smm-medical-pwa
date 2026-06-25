@@ -70,13 +70,29 @@ function ProductCard({
   onIncreaseQuantity,
   onDecreaseQuantity,
   onToggleFavorite,
+  onOpenProduct,
 }) {
   const price = getPriceParts(product, exchangeRate);
   const badges = getProductBadges(product);
   const imageUrl = getVersionedImageUrl(product);
 
   return (
-    <article className={`product-card premium-product-card tone-${product.tone}`}>
+    <article
+      className={`product-card premium-product-card tone-${product.tone} is-clickable`}
+      role="link"
+      tabIndex={0}
+      aria-label={`عرض تفاصيل ${product.name}`}
+      onClick={() => onOpenProduct?.(product)}
+      onKeyDown={(event) => {
+        if (
+          event.target === event.currentTarget &&
+          (event.key === "Enter" || event.key === " ")
+        ) {
+          event.preventDefault();
+          onOpenProduct?.(product);
+        }
+      }}
+    >
       <div className={`product-visual ${product.tone}`}>
         <div className="product-card-badges">
           {badges.map((badge) => (
@@ -90,7 +106,11 @@ function ProductCard({
           type="button"
           aria-label="المفضلة"
           className={isFavorite ? "favorite-button is-favorite" : "favorite-button"}
-          onClick={() => onToggleFavorite(product.id)}
+          onClick={(event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            onToggleFavorite(product.id);
+          }}
         >
           <Heart size={20} />
         </button>
@@ -128,6 +148,7 @@ function ProductCard({
               className="quantity-control-button quantity-control-button--minus"
               aria-label="إنقاص الكمية"
               onClick={(event) => {
+                event.preventDefault();
                 event.stopPropagation();
                 onDecreaseQuantity?.(product.id);
               }}
@@ -142,6 +163,7 @@ function ProductCard({
               className="quantity-control-button quantity-control-button--plus"
               aria-label="زيادة الكمية"
               onClick={(event) => {
+                event.preventDefault();
                 event.stopPropagation();
                 if (onIncreaseQuantity) {
                   onIncreaseQuantity(product.id);
@@ -159,7 +181,11 @@ function ProductCard({
             type="button"
             className="add-cart-button"
             aria-label="إضافة للسلة"
-            onClick={() => onAddToCart(product)}
+            onClick={(event) => {
+              event.preventDefault();
+              event.stopPropagation();
+              onAddToCart(product);
+            }}
           >
             <ShoppingCart size={20} />
             <span>أضف للسلة</span>
