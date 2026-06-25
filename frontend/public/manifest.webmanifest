@@ -1,4 +1,4 @@
-{
+﻿{
   "name": "Sahnaya Medical Mall",
   "short_name": "SMM",
   "description": "كتالوج طبي ذكي لمنتجات مول صحنايا الطبي",
@@ -13,9 +13,9 @@
   "categories": ["medical", "shopping", "health"],
   "icons": [
     {
-      "src": "/icons/smm-icon.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
+      "src": "/icons/logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
       "purpose": "any maskable"
     }
   ]

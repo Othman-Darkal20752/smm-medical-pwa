@@ -30,14 +30,13 @@ import DrawerMenu from "./components/DrawerMenu";
 import EmptyState from "./components/EmptyState";
 import InstallPrompt from "./components/InstallPrompt";
 
-import AdminDashboard from "./pages/AdminDashboard";
 
 const CART_STORAGE_KEY = "smm_medical_cart";
 const SHAM_CASH_QR_SRC = "/payments/sham-cash-qr.png";
 const DEFAULT_EXCHANGE_RATE = 13000;
 const STORE_MAP_URL = "https://maps.app.goo.gl/ven1Hxt3oZudRRtD7?g_st=aw";
 const STORE_FACEBOOK_URL =
-  "https://www.facebook.com/people/%D9%85%D9%88%D9%84-%D8%B5%D8%AD%D9%86%D8%A7%D9%8A%D8%A7-%D8%A7%D9%84%D8%B7%D8%A8%D9%8A/61582001177795/";
+  "https://www.facebook.com/share/1Hv7jgUZFW/";
 const STORE_LOCATION_TEXT = "صحنايا، سوريا - C6FF+2MG";
 const STORE_SHIPPING_TEXT = "شحن لكافة المحافظات السورية";
 const STORE_FOOTER_DESCRIPTION =
@@ -1108,18 +1107,32 @@ ${STORE_SHIPPING_TEXT}${
     return renderHomePage();
   };
 
-  if (currentPath.startsWith("/admin")) {
-    return (
-      <AdminDashboard
-        products={productList}
-        setProducts={setProductList}
-        categoryOptions={categoryOptions}
-        onBackToApp={() => navigateToPath("/")}
-        exchangeRate={exchangeRate}
-        setExchangeRate={setExchangeRate}
-      />
-    );
-  }
+if (currentPath.startsWith("/admin")) {
+  return (
+    <div className="admin-shell" dir="rtl">
+      <header className="admin-hero">
+        <button
+          className="admin-back-btn"
+          type="button"
+          onClick={() => {
+            window.location.href = "/";
+          }}
+        >
+          رجوع للتطبيق
+        </button>
+
+        <div>
+          <span>لوحة إدارة SMM</span>
+          <h1>قيد الربط بالباكند</h1>
+          <p>
+            تم إيقاف لوحة الإدارة التجريبية مؤقتًا. سيتم استبدالها بلوحة حقيقية
+            مرتبطة بقاعدة البيانات مثل G4.
+          </p>
+        </div>
+      </header>
+    </div>
+  );
+}
 
   return (
     <div className="app" dir="rtl">

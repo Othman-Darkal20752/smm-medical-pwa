@@ -1,15 +1,9 @@
-const CACHE_NAME = "smm-pwa-v4";
+﻿const CACHE_NAME = "smm-pwa-v5";
 
 const STATIC_ASSETS = [
   "/",
   "/manifest.webmanifest",
-  "/icons/smm-icon.svg",
-  "/hero/hero-1-desktop.webp",
-  "/hero/hero-1-mobile.webp",
-  "/hero/hero-2-desktop.webp",
-  "/hero/hero-2-mobile.webp",
-  "/hero/hero-3-desktop.webp",
-  "/hero/hero-3-mobile.webp"
+  "/icons/logo.png"
 ];
 
 self.addEventListener("install", (event) => {
@@ -42,24 +36,31 @@ self.addEventListener("fetch", (event) => {
 
   const url = new URL(request.url);
 
-  if (url.pathname.startsWith("/api/") || url.pathname.startsWith("/media/")) {
+  if (
+    url.pathname.startsWith("/api/") ||
+    url.pathname.startsWith("/media/") ||
+    url.pathname.startsWith("/hero/")
+  ) {
     event.respondWith(fetch(request));
     return;
   }
 
   if (request.mode === "navigate") {
-    event.respondWith(fetch(request).catch(() => caches.match("/")));
+    event.respondWith(
+      fetch(request)
+        .then((response) => response)
+        .catch(() => caches.match("/"))
+    );
     return;
   }
 
   event.respondWith(
-    caches.match(request).then((cachedResponse) => {
-      if (cachedResponse) return cachedResponse;
-
-      return fetch(request).then((networkResponse) => {
+    fetch(request)
+      .then((networkResponse) => {
         const isStaticAsset =
           STATIC_ASSETS.includes(url.pathname) ||
-          url.pathname.startsWith("/assets/");
+          url.pathname.startsWith("/assets/") ||
+          url.pathname.startsWith("/icons/");
 
         if (isStaticAsset && networkResponse.ok) {
           const responseClone = networkResponse.clone();
@@ -69,7 +70,7 @@ self.addEventListener("fetch", (event) => {
         }
 
         return networkResponse;
-      });
-    })
+      })
+      .catch(() => caches.match(request))
   );
 });

@@ -1,44 +1,25 @@
 import { useEffect, useState } from "react";
-import { ChevronLeft, MessageCircle, PackageSearch } from "lucide-react";
 import { storeInfo } from "../data/storeInfo";
 
-const fallbackSlides = [
-  {
-    eyebrow: "نظارات طبية وشمسية",
-    title: "نظارات طبية وشمسية بتصاميم موثوقة",
-    text: "اختيارات أنيقة وعملية للنظارات الطبية والشمسية ضمن مول صحنايا الطبي.",
-    desktopImage: "/hero/hero-1-desktop.webp",
-    mobileImage: "/hero/hero-1-mobile.webp",
-  },
-  {
-    eyebrow: "SAHNAYA MEDICAL MALL",
-    title: "كل ما يلزم الطبيب والمريض تجده هنا",
-    text: "أجهزة طبية، مستلزمات، مواد سنية، دعامات، نظارات ومنتجات عناية تحت سقف واحد.",
-    desktopImage: "/hero/hero-2-desktop.webp",
-    mobileImage: "/hero/hero-2-mobile.webp",
-  },
-  {
-    eyebrow: "منتجات موثوقة ومرخصة",
-    title: "تجربة تصفح طبية حديثة وسريعة",
-    text: "تصفح التصنيفات والعروض، وأرسل طلبك مباشرة عبر واتساب لتأكيد التوفر والسعر النهائي.",
-    desktopImage: "/hero/hero-3-desktop.webp",
-    mobileImage: "/hero/hero-3-mobile.webp",
-  },
-];
-
 function normalizeHeroSlide(item) {
+  const desktopImage = item.desktop_image || item.desktopImage || item.mobile_image || "";
+  const mobileImage = item.mobile_image || item.mobileImage || item.desktop_image || desktopImage;
+
+  if (!desktopImage && !mobileImage) {
+    return null;
+  }
+
   return {
     eyebrow: item.eyebrow || "",
     title: item.title || "",
     text: item.text || "",
-    desktopImage: item.desktop_image || item.mobile_image || "/hero/hero-1-desktop.webp",
-    mobileImage: item.mobile_image || item.desktop_image || "/hero/hero-1-mobile.webp",
+    desktopImage,
+    mobileImage,
   };
 }
 
-function HomeHero({ onBrowseProducts }) {
-  const whatsappUrl = `https://wa.me/${storeInfo.whatsappRaw}`;
-  const [slides, setSlides] = useState(fallbackSlides);
+function HomeHero() {
+  const [slides, setSlides] = useState([]);
   const [activeSlide, setActiveSlide] = useState(0);
 
   useEffect(() => {
@@ -48,6 +29,7 @@ function HomeHero({ onBrowseProducts }) {
       try {
         const response = await fetch("/api/hero-slides/", {
           headers: { Accept: "application/json" },
+          cache: "no-store",
         });
 
         if (!response.ok) {
@@ -56,12 +38,16 @@ function HomeHero({ onBrowseProducts }) {
 
         const data = await response.json();
 
-        if (!ignore && Array.isArray(data) && data.length > 0) {
-          setSlides(data.map(normalizeHeroSlide));
+        if (!ignore && Array.isArray(data)) {
+          const normalizedSlides = data
+            .map(normalizeHeroSlide)
+            .filter(Boolean);
+
+          setSlides(normalizedSlides);
           setActiveSlide(0);
         }
       } catch (error) {
-        console.warn("Using fallback hero slides:", error);
+        console.warn("Hero slides unavailable:", error);
       }
     }
 
@@ -82,7 +68,11 @@ function HomeHero({ onBrowseProducts }) {
     return () => window.clearInterval(timer);
   }, [slides.length]);
 
-  const slide = slides[activeSlide] || fallbackSlides[0];
+  const slide = slides[activeSlide];
+
+  if (!slides.length || !slide) {
+    return null;
+  }
 
   return (
     <section className="hero-carousel hero-image-carousel" id="home-section">
@@ -104,37 +94,9 @@ function HomeHero({ onBrowseProducts }) {
           </div>
         </div>
 
-        <span className="hero-eyebrow">{slide.eyebrow}</span>
-        <h1>{slide.title}</h1>
-        <p>{slide.text}</p>
-
-        <div className="hero-actions">
-          <button type="button" onClick={onBrowseProducts}>
-            <PackageSearch size={19} />
-            تصفح المنتجات
-            <ChevronLeft size={18} />
-          </button>
-
-          <a href={whatsappUrl} target="_blank" rel="noreferrer">
-            <MessageCircle size={18} />
-            اطلب الآن
-          </a>
-        </div>
-
-        <div className="hero-metrics">
-          <article>
-            <strong>+20</strong>
-            <span>منتج طبي</span>
-          </article>
-          <article>
-            <strong>11</strong>
-            <span>تصنيف</span>
-          </article>
-          <article>
-            <strong>100%</strong>
-            <span>منتجات موثوقة</span>
-          </article>
-        </div>
+        {slide.eyebrow && <span className="hero-eyebrow">{slide.eyebrow}</span>}
+        {slide.title && <h1>{slide.title}</h1>}
+        {slide.text && <p>{slide.text}</p>}
       </div>
 
       {slides.length > 1 && (

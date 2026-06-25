@@ -1,4 +1,4 @@
-export const storeInfo = {
+﻿export const storeInfo = {
   name: "مول صحنايا الطبي",
   englishName: "Sahnaya Medical Mall",
   shortName: "SMM",
@@ -8,5 +8,5 @@ export const storeInfo = {
   location: "صحنايا",
   whatsapp: "+963 945 151 299",
   whatsappRaw: "963945151299",
-  logo: "/brand/smm-logo.png",
+  logo: "/icons/logo.png",
 };
