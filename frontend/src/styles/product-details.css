@@ -446,3 +446,141 @@
     gap: 12px;
   }
 }
+
+/* Stage 2 compact v2: reduce mobile product details card height */
+@media (max-width: 560px) {
+  .product-details-page {
+    gap: 12px;
+  }
+
+  .product-details-back {
+    padding: 8px 11px;
+    border-radius: 12px;
+    font-size: 12px;
+  }
+
+  .product-details-card {
+    border-radius: 20px;
+  }
+
+  .product-details-visual {
+    min-height: 108px;
+    padding: 8px 14px;
+  }
+
+  .product-details-image-button {
+    min-height: 88px;
+    border-radius: 14px;
+  }
+
+  .product-details-image-button img,
+  .product-details-visual img {
+    max-height: 92px;
+  }
+
+  .product-details-favorite {
+    top: 10px;
+    left: 10px;
+    width: 34px;
+    height: 34px;
+  }
+
+  .product-details-info {
+    padding: 12px 14px 14px;
+  }
+
+  .product-details-category {
+    padding: 5px 9px;
+    font-size: 10px;
+  }
+
+  .product-details-info h1 {
+    margin: 8px 0 9px;
+    font-size: 19px;
+    line-height: 1.25;
+  }
+
+  .product-details-price {
+    gap: 2px;
+    padding-bottom: 10px;
+  }
+
+  .product-details-price strong {
+    font-size: 20px;
+  }
+
+  .product-details-price span {
+    font-size: 12px;
+  }
+
+  .product-details-price .is-request-price {
+    font-size: 17px;
+  }
+
+  .product-details-description {
+    margin-top: 10px;
+  }
+
+  .product-details-description h2 {
+    margin-bottom: 5px;
+    font-size: 13px;
+  }
+
+  .product-details-description p {
+    font-size: 11px;
+    line-height: 1.55;
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .product-details-shipping {
+    margin-top: 10px;
+    padding: 8px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+  }
+
+  .product-details-shipping svg {
+    width: 17px;
+    height: 17px;
+  }
+
+  .product-details-actions {
+    gap: 8px;
+    padding-top: 12px;
+  }
+
+  .product-details-add,
+  .product-details-whatsapp,
+  .product-details-quantity {
+    min-height: 42px;
+    border-radius: 13px;
+    font-size: 12px;
+  }
+
+  .product-details-add svg,
+  .product-details-whatsapp svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .product-details-quantity {
+    grid-template-columns: 38px 1fr 38px;
+    padding: 4px;
+  }
+
+  .product-details-quantity button {
+    height: 34px;
+    border-radius: 10px;
+  }
+
+  .product-details-quantity span {
+    font-size: 16px;
+  }
+
+  .product-details-similar.section-block {
+    margin-top: 12px;
+  }
+}
