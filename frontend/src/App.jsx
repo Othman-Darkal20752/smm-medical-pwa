@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ChevronLeft,
   CreditCard,
@@ -13,7 +13,6 @@ import "./App.css";
 
 import { storeInfo } from "./data/storeInfo";
 import { categories } from "./data/categories";
-import { offers } from "./data/offers";
 import { products as initialProducts } from "./data/products";
 
 import {
@@ -28,7 +27,6 @@ import { useAutoHorizontalScroll } from "./hooks/useAutoHorizontalScroll";
 import AppHeader from "./components/AppHeader";
 import HomeHero from "./components/HomeHero";
 import CategoryStrip from "./components/CategoryStrip";
-import OfferCard from "./components/OfferCard";
 import ProductCard from "./components/ProductCard";
 import BottomNav from "./components/BottomNav";
 import DrawerMenu from "./components/DrawerMenu";
@@ -70,7 +68,70 @@ const paymentMethods = [
 
 const DEFAULT_PAYMENT_METHOD = paymentMethods[0].id;
 const HOME_PRODUCTS_PRELOAD_SIZE = 24;
+const HOME_SECTION_PAGE_SIZE = 10;
+const FEATURED_PAGE_SIZE = 8;
 const PRODUCTS_PAGE_SEARCH_DELAY = 350;
+
+const FEATURED_PAGE_CONFIGS = {
+  offers: {
+    apiParam: "is_offer",
+    label: "عروض مول صحنايا الطبي",
+    title: "العروض والخصومات",
+    description: "منتجات عليها عروض أو أسعار مميزة، يتم جلبها مباشرة من قاعدة البيانات.",
+    status: "منتجات ضمن العروض",
+    loadingText: "جاري تحميل العروض من قاعدة البيانات...",
+    emptyText: "لا توجد عروض متاحة حالياً.",
+  },
+  new: {
+    apiParam: "is_new",
+    label: "وصل حديثاً",
+    title: "جديد مول صحنايا الطبي",
+    description: "أحدث المنتجات المضافة إلى الكتالوج من قاعدة البيانات.",
+    status: "منتجات جديدة",
+    loadingText: "جاري تحميل المنتجات الجديدة من قاعدة البيانات...",
+    emptyText: "لا توجد منتجات جديدة حالياً.",
+  },
+  best: {
+    apiParam: "is_best_seller",
+    label: "الأكثر طلباً",
+    title: "الأكثر مبيعاً وطلباً",
+    description: "المنتجات الأكثر طلباً ضمن كتالوج مول صحنايا الطبي.",
+    status: "منتجات الأكثر طلباً",
+    loadingText: "جاري تحميل المنتجات الأكثر طلباً من قاعدة البيانات...",
+    emptyText: "لا توجد منتجات مميزة حالياً.",
+  },
+};
+
+function getFeaturedApiParams(pageKey, extraParams = {}) {
+  const config = FEATURED_PAGE_CONFIGS[pageKey];
+
+  if (!config) return extraParams;
+
+  return {
+    ...extraParams,
+    [config.apiParam]: true,
+  };
+}
+
+function getFallbackFeaturedProducts(pageKey, products) {
+  const sourceProducts = Array.isArray(products) ? products : [];
+
+  if (pageKey === "offers") {
+    return sourceProducts.filter((product) => product.is_offer || product.tag === "عرض");
+  }
+
+  if (pageKey === "new") {
+    return sourceProducts.filter((product) => product.is_new || product.tag === "جديد");
+  }
+
+  if (pageKey === "best") {
+    return sourceProducts.filter(
+      (product) => product.is_best_seller || product.tag === "الأكثر طلباً"
+    );
+  }
+
+  return [];
+}
 
 
 function getProductIdFromPath(pathname) {
@@ -232,6 +293,27 @@ function App() {
   const [catalogLoading, setCatalogLoading] = useState(false);
   const [catalogLoadingMore, setCatalogLoadingMore] = useState(false);
   const [catalogError, setCatalogError] = useState("");
+  const [homeSections, setHomeSections] = useState(() => ({
+    offers: getFallbackFeaturedProducts("offers", initialProducts).slice(
+      0,
+      HOME_SECTION_PAGE_SIZE
+    ),
+    new: getFallbackFeaturedProducts("new", initialProducts).slice(
+      0,
+      HOME_SECTION_PAGE_SIZE
+    ),
+    best: getFallbackFeaturedProducts("best", initialProducts).slice(
+      0,
+      HOME_SECTION_PAGE_SIZE
+    ),
+  }));
+  const [featuredProducts, setFeaturedProducts] = useState([]);
+  const [featuredCount, setFeaturedCount] = useState(0);
+  const [featuredPage, setFeaturedPage] = useState(1);
+  const [featuredNext, setFeaturedNext] = useState(null);
+  const [featuredLoading, setFeaturedLoading] = useState(false);
+  const [featuredLoadingMore, setFeaturedLoadingMore] = useState(false);
+  const [featuredError, setFeaturedError] = useState("");
   const [productDetailsById, setProductDetailsById] = useState({});
   const [productDetailsStatus, setProductDetailsStatus] = useState({});
 
@@ -246,7 +328,9 @@ function App() {
   const bestSellerRowRef = useRef(null);
   const searchInputRef = useRef(null);
   const productsLoadMoreRef = useRef(null);
+  const featuredLoadMoreRef = useRef(null);
   const productsRequestIdRef = useRef(0);
+  const featuredRequestIdRef = useRef(0);
   const productListRef = useRef(productList);
 
   const whatsappUrl = `https://wa.me/${storeInfo.whatsappRaw}`;
@@ -256,34 +340,91 @@ function App() {
 
     async function loadBackendCatalog() {
       try {
-        const [settingsData, backendCategories, backendProducts] =
-          await Promise.all([
-            fetchSiteSettings(),
-            fetchCategories(),
-            fetchProducts({ page_size: HOME_PRODUCTS_PRELOAD_SIZE }),
-          ]);
+        const [
+          settingsResult,
+          categoriesResult,
+          productsResult,
+          offersResult,
+          newResult,
+          bestResult,
+        ] = await Promise.allSettled([
+          fetchSiteSettings(),
+          fetchCategories(),
+          fetchProducts({ page_size: HOME_PRODUCTS_PRELOAD_SIZE }),
+          fetchProducts(getFeaturedApiParams("offers", {
+            page_size: HOME_SECTION_PAGE_SIZE,
+          })),
+          fetchProducts(getFeaturedApiParams("new", {
+            page_size: HOME_SECTION_PAGE_SIZE,
+          })),
+          fetchProducts(getFeaturedApiParams("best", {
+            page_size: HOME_SECTION_PAGE_SIZE,
+          })),
+        ]);
 
         if (cancelled) return;
 
-        if (Array.isArray(backendCategories) && backendCategories.length > 0) {
-          setCategoryList(backendCategories);
+        if (
+          categoriesResult.status === "fulfilled" &&
+          Array.isArray(categoriesResult.value) &&
+          categoriesResult.value.length > 0
+        ) {
+          setCategoryList(categoriesResult.value);
         }
 
+        const fetchedProductGroups = [];
+
         if (
-          backendProducts &&
-          Array.isArray(backendProducts.products) &&
-          backendProducts.products.length > 0
+          productsResult.status === "fulfilled" &&
+          Array.isArray(productsResult.value?.products) &&
+          productsResult.value.products.length > 0
         ) {
-          setProductList(backendProducts.products);
+          fetchedProductGroups.push(productsResult.value.products);
+          setProductList(productsResult.value.products);
         }
 
-        const backendExchangeRate = Number(settingsData?.store?.exchange_rate);
+        const nextHomeSections = {};
 
-        if (
-          Number.isFinite(backendExchangeRate) &&
-          backendExchangeRate > 0
-        ) {
-          setExchangeRate(backendExchangeRate);
+        [
+          ["offers", offersResult],
+          ["new", newResult],
+          ["best", bestResult],
+        ].forEach(([sectionKey, result]) => {
+          if (result.status !== "fulfilled") return;
+
+          const sectionProducts = result.value?.products || [];
+          nextHomeSections[sectionKey] = sectionProducts;
+
+          if (sectionProducts.length > 0) {
+            fetchedProductGroups.push(sectionProducts);
+          }
+        });
+
+        if (Object.keys(nextHomeSections).length > 0) {
+          setHomeSections((sections) => ({
+            ...sections,
+            ...nextHomeSections,
+          }));
+        }
+
+        if (fetchedProductGroups.length > 1) {
+          const flattenedProducts = fetchedProductGroups.flat();
+          setProductList((products) =>
+            upsertProductsById(products, flattenedProducts)
+          );
+        }
+
+        if (settingsResult.status === "fulfilled") {
+          const backendExchangeRate = Number(
+            settingsResult.value?.store?.exchange_rate
+          );
+
+          if (
+            Number.isFinite(backendExchangeRate) &&
+            backendExchangeRate > 0
+          ) {
+            setExchangeRate(backendExchangeRate);
+          }
         }
       } catch (error) {
         console.warn("Using local fallback catalog data:", error);
@@ -424,8 +565,13 @@ function App() {
 
   const isProductsCatalogPage =
     activePage === "products" && getProductIdFromPath(currentPath) === null;
+  const isFeaturedProductsPage =
+    Boolean(FEATURED_PAGE_CONFIGS[activePage]) &&
+    getProductIdFromPath(currentPath) === null;
   const hasMoreCatalogProducts =
     Boolean(catalogNext) || catalogProducts.length < catalogCount;
+  const hasMoreFeaturedProducts =
+    Boolean(featuredNext) || featuredProducts.length < featuredCount;
 
   useEffect(() => {
     if (!isProductsCatalogPage) return;
@@ -591,6 +737,167 @@ function App() {
   ]);
 
   useEffect(() => {
+    if (!isFeaturedProductsPage) return;
+
+    let cancelled = false;
+    const requestId = featuredRequestIdRef.current + 1;
+    featuredRequestIdRef.current = requestId;
+    const config = FEATURED_PAGE_CONFIGS[activePage];
+
+    async function loadFeaturedProducts() {
+      setFeaturedLoading(true);
+      setFeaturedLoadingMore(false);
+      setFeaturedError("");
+
+      try {
+        const response = await fetchProducts(
+          getFeaturedApiParams(activePage, {
+            page: 1,
+            page_size: FEATURED_PAGE_SIZE,
+          })
+        );
+
+        if (cancelled || featuredRequestIdRef.current !== requestId) return;
+
+        setFeaturedProducts(response.products);
+        setFeaturedCount(response.count);
+        setFeaturedPage(1);
+        setFeaturedNext(response.next);
+
+        if (response.products.length > 0) {
+          setProductList((products) =>
+            upsertProductsById(products, response.products)
+          );
+          setHomeSections((sections) => ({
+            ...sections,
+            [activePage]: response.products.slice(0, HOME_SECTION_PAGE_SIZE),
+          }));
+        }
+      } catch (error) {
+        if (cancelled || featuredRequestIdRef.current !== requestId) return;
+
+        console.warn(`Using local fallback ${activePage} products:`, error);
+
+        const fallbackProducts = getFallbackFeaturedProducts(
+          activePage,
+          productListRef.current
+        );
+
+        setFeaturedProducts(fallbackProducts.slice(0, FEATURED_PAGE_SIZE));
+        setFeaturedCount(fallbackProducts.length);
+        setFeaturedPage(1);
+        setFeaturedNext(null);
+        setFeaturedError(
+          `تعذر الاتصال بقاعدة البيانات حالياً، لذلك تم عرض ${
+            config?.status || "المنتجات"
+          } من نسخة محلية مؤقتة.`
+        );
+      } finally {
+        if (!cancelled && featuredRequestIdRef.current === requestId) {
+          setFeaturedLoading(false);
+        }
+      }
+    }
+
+    loadFeaturedProducts();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [activePage, isFeaturedProductsPage]);
+
+  useEffect(() => {
+    if (
+      !isFeaturedProductsPage ||
+      !hasMoreFeaturedProducts ||
+      featuredLoading ||
+      featuredLoadingMore ||
+      !FEATURED_PAGE_CONFIGS[activePage] ||
+      !("IntersectionObserver" in window)
+    ) {
+      return undefined;
+    }
+
+    const target = featuredLoadMoreRef.current;
+
+    if (!target) return undefined;
+
+    let cancelled = false;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (!entries[0]?.isIntersecting || cancelled) return;
+
+        const nextPage = featuredPage + 1;
+
+        async function loadNextFeaturedPage() {
+          setFeaturedLoadingMore(true);
+
+          try {
+            const response = await fetchProducts(
+              getFeaturedApiParams(activePage, {
+                page: nextPage,
+                page_size: FEATURED_PAGE_SIZE,
+              })
+            );
+
+            if (cancelled) return;
+
+            setFeaturedProducts((products) => {
+              const existingIds = new Set(
+                products.map((product) => String(product.id))
+              );
+              const nextProducts = response.products.filter(
+                (product) => !existingIds.has(String(product.id))
+              );
+
+              return [...products, ...nextProducts];
+            });
+            setFeaturedCount(response.count);
+            setFeaturedPage(nextPage);
+            setFeaturedNext(response.next);
+
+            if (response.products.length > 0) {
+              setProductList((products) =>
+                upsertProductsById(products, response.products)
+              );
+            }
+          } catch (error) {
+            if (!cancelled) {
+              console.warn("Failed to load next featured products page:", error);
+              setFeaturedNext(null);
+              setFeaturedError(
+                "تعذر تحميل المزيد من قاعدة البيانات. جرّب تحديث الصفحة لاحقاً."
+              );
+            }
+          } finally {
+            if (!cancelled) {
+              setFeaturedLoadingMore(false);
+            }
+          }
+        }
+
+        observer.unobserve(target);
+        loadNextFeaturedPage();
+      },
+      { rootMargin: "520px 0px" }
+    );
+
+    observer.observe(target);
+
+    return () => {
+      cancelled = true;
+      observer.disconnect();
+    };
+  }, [
+    activePage,
+    featuredLoading,
+    featuredLoadingMore,
+    featuredPage,
+    hasMoreFeaturedProducts,
+    isFeaturedProductsPage,
+  ]);
+
+  useEffect(() => {
     const productId = getProductIdFromPath(currentPath);
 
     if (productId === null) return;
@@ -643,23 +950,20 @@ function App() {
   }, [currentPath, productDetailsById, productList]);
 
   const newProducts = useMemo(() => {
-    const list = productList.filter((product) => product.is_new);
-    return list.length ? list : productList;
-  }, [productList]);
+    return homeSections.new;
+  }, [homeSections.new]);
 
   const bestSellerProducts = useMemo(() => {
-    const list = productList.filter((product) => product.is_best_seller);
-    return list.length ? list : productList;
-  }, [productList]);
+    return homeSections.best;
+  }, [homeSections.best]);
 
   const offerProducts = useMemo(() => {
-    const list = filteredProducts.filter((product) => product.is_offer);
-    return list.length ? list : filteredProducts.filter((product) => product.tag === "عرض");
-  }, [filteredProducts]);
+    return homeSections.offers;
+  }, [homeSections.offers]);
 
   const autoScrollOffers = useMemo(() => {
-    return [...offers, ...offers];
-  }, []);
+    return offerProducts;
+  }, [offerProducts]);
 
   const autoScrollProducts = useMemo(() => {
     return newProducts;
@@ -672,7 +976,7 @@ function App() {
   useAutoHorizontalScroll(
     offerRowRef,
     activePage === "home" && autoScrollOffers.length > 3,
-    "offers"
+    `offers-products-${autoScrollOffers.length}`
   );
 
   useAutoHorizontalScroll(
@@ -823,8 +1127,6 @@ ${STORE_SHIPPING_TEXT}${
   const handleNavClick = (id) => {
     const aliases = {
       store: "products",
-      new: "home",
-      best: "home",
     };
 
     handlePageChange(aliases[id] || id);
@@ -993,18 +1295,34 @@ ${STORE_SHIPPING_TEXT}${
           </button>
         </div>
 
-        <div className="offer-row auto-scroll-row" ref={offerRowRef}>
-          {autoScrollOffers.map((offer, index) => (
-            <OfferCard offer={offer} key={`${offer.id}-${index}`} />
-          ))}
+        <div className="product-row auto-scroll-row" ref={offerRowRef}>
+          {autoScrollOffers.map((product, index) => {
+            const cartQuantity = getCartQuantity(product.id);
+
+            return (
+              <ProductCard
+                product={product}
+                key={`offer-${product.id}-${index}`}
+                isFavorite={favoriteIds.includes(product.id)}
+                isInCart={cartQuantity > 0}
+                cartQuantity={cartQuantity}
+                onAddToCart={handleAddToCart}
+                onIncreaseQuantity={increaseQuantity}
+                onDecreaseQuantity={decreaseQuantity}
+                onToggleFavorite={toggleFavorite}
+                onOpenProduct={handleOpenProduct}
+                exchangeRate={exchangeRate}
+              />
+            );
+          })}
         </div>
       </section>
 
       <section className="section-block">
         <div className="section-title">
           <h2>جديدنا</h2>
-          <button type="button" onClick={() => handlePageChange("products")}>
-            عرض المنتجات
+          <button type="button" onClick={() => handlePageChange("new")}>
+            عرض الجديد
             <ChevronLeft size={19} />
           </button>
         </div>
@@ -1035,8 +1353,8 @@ ${STORE_SHIPPING_TEXT}${
       <section className="section-block">
         <div className="section-title">
           <h2>الأكثر طلباً</h2>
-          <button type="button" onClick={() => handlePageChange("products")}>
-            عرض المنتجات
+          <button type="button" onClick={() => handlePageChange("best")}>
+            عرض الأكثر طلباً
             <ChevronLeft size={19} />
           </button>
         </div>
@@ -1163,35 +1481,91 @@ ${STORE_SHIPPING_TEXT}${
     );
   };
 
-  const renderOffersPage = () => (
-    <>
-      <section className="page-head">
-        <span>عروض مول صحنايا الطبي</span>
-        <h1>العروض والخصومات</h1>
-        <p>تابع العروض المتوفرة على المستلزمات والأجهزة الطبية.</p>
-      </section>
+  const renderFeaturedProductsPage = (pageKey) => {
+    const config = FEATURED_PAGE_CONFIGS[pageKey];
+    const totalProductsCount = featuredCount || featuredProducts.length;
+    const loadedProductsCount = featuredProducts.length;
+    const isInitialFeaturedLoading =
+      featuredLoading && loadedProductsCount === 0;
 
-      <section className="section-block">
-        <div className="offer-row">
-          {offers.map((offer) => (
-            <OfferCard offer={offer} key={offer.id} />
-          ))}
-        </div>
-      </section>
+    return (
+      <>
+        <section className="page-head featured-products-head">
+          <span>{config.label}</span>
+          <h1>{config.title}</h1>
+          <p>{config.description}</p>
+        </section>
 
-      <section className="section-block products-list-section">
-        <div className="section-title">
-          <h2>منتجات ضمن العروض</h2>
-          <button type="button" onClick={() => handlePageChange("products")}>
-            كل المنتجات
-            <ChevronLeft size={19} />
-          </button>
-        </div>
+        <section className="products-summary-card featured-summary-card">
+          <div className="products-summary-main">
+            <span className="products-status-pill">{config.status}</span>
+            <h2>{config.title}</h2>
+            <p>
+              هذه القائمة مرتبطة مباشرة بقاعدة البيانات، ويتم تحديثها من لوحة
+              الإدارة حسب خصائص المنتج.
+            </p>
+          </div>
 
-        {renderProductCards(offerProducts)}
-      </section>
-    </>
-  );
+          <div className="products-summary-meta">
+            <strong>{isInitialFeaturedLoading ? "..." : totalProductsCount}</strong>
+            <span>منتج مطابق</span>
+          </div>
+        </section>
+
+        <section className="section-block products-list-section">
+          <div className="products-toolbar">
+            <div>
+              <span>المعروض حالياً</span>
+              <strong>
+                {loadedProductsCount} من {totalProductsCount}
+              </strong>
+            </div>
+
+            <button type="button" onClick={() => handlePageChange("products")}>
+              كل المنتجات
+              <ChevronLeft size={19} />
+            </button>
+          </div>
+
+          {featuredError && <p className="products-api-note">{featuredError}</p>}
+
+          {isInitialFeaturedLoading ? (
+            <div className="products-loading-card">
+              <ShoppingCart size={28} />
+              <strong>{config.loadingText}</strong>
+              <span>يتم جلب النتائج حسب الخاصية المحددة من قاعدة البيانات.</span>
+            </div>
+          ) : featuredProducts.length === 0 ? (
+            <div className="products-empty-card">
+              <ShoppingCart size={28} />
+              <strong>{config.emptyText}</strong>
+              <span>يمكن تعديل خصائص المنتجات من لوحة الإدارة لاحقاً.</span>
+            </div>
+          ) : (
+            renderProductCards(featuredProducts)
+          )}
+
+          {hasMoreFeaturedProducts && !featuredError && (
+            <div className="infinite-scroll-sentinel" ref={featuredLoadMoreRef}>
+              {featuredLoadingMore ? (
+                <span>جاري تحميل المزيد من المنتجات...</span>
+              ) : (
+                <span>مرر للأسفل لتحميل المزيد تلقائياً</span>
+              )}
+            </div>
+          )}
+
+          {!hasMoreFeaturedProducts &&
+            loadedProductsCount > 0 &&
+            !featuredLoading && (
+              <div className="products-end-message">
+                تم عرض كل المنتجات المطابقة.
+              </div>
+            )}
+        </section>
+      </>
+    );
+  };
 
   const renderCartPage = () => (
     <>
@@ -1467,7 +1841,9 @@ ${STORE_SHIPPING_TEXT}${
     }
 
     if (activePage === "products") return renderProductsPage();
-    if (activePage === "offers") return renderOffersPage();
+    if (FEATURED_PAGE_CONFIGS[activePage]) {
+      return renderFeaturedProductsPage(activePage);
+    }
     if (activePage === "cart") return renderCartPage();
     if (activePage === "contact") return renderContactPage();
 
