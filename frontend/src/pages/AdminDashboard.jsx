@@ -1072,7 +1072,7 @@ function AdminDashboard({ onBackToApp }) {
         <div className="admin-login-card">
           <div className="admin-login-brand">
             <span className="admin-logo-mark">
-              <img src={DASHBOARD_LOGO} alt="??? ?????? ?????" />
+              <img src={DASHBOARD_LOGO} alt="مول صحنايا الطبي" />
             </span>
             <h1>مول صحنايا الطبي</h1>
             <p>لوحة إدارة المتجر</p>
@@ -1125,7 +1125,7 @@ function AdminDashboard({ onBackToApp }) {
       <aside className={`admin-sidebar ${mobileMenuOpen ? "is-open" : ""}`}>
         <div className="admin-sidebar-brand">
           <span className="admin-logo-mark admin-logo-mark--small">
-            <img src={DASHBOARD_LOGO} alt="??? ?????? ?????" />
+            <img src={DASHBOARD_LOGO} alt="مول صحنايا الطبي" />
           </span>
           <div>
             <strong>مول صحنايا الطبي</strong>
