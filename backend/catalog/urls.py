@@ -6,6 +6,7 @@ from .views import (
     AdminHeroSlideViewSet,
     AdminOfferBannerViewSet,
     AdminProductViewSet,
+    admin_login,
     CategoryViewSet,
     HeroSlideViewSet,
     OfferBannerViewSet,
@@ -30,6 +31,7 @@ admin_router.register("offer-banners", AdminOfferBannerViewSet, basename="admin-
 urlpatterns = [
     path("", include(public_router.urls)),
     path("settings/", site_settings, name="site-settings"),
+    path("admin/login/", admin_login, name="admin-login"),
     path("admin/settings/", admin_site_settings, name="admin-site-settings"),
     path("admin/payment-settings/", admin_payment_settings, name="admin-payment-settings"),
     path("admin/", include(admin_router.urls)),

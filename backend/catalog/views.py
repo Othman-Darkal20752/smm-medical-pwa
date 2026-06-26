@@ -1,7 +1,8 @@
 from django.conf import settings
+from django.contrib.auth import authenticate
 from django.db.models import Count, Q
 from rest_framework import pagination, permissions, viewsets
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from rest_framework.response import Response
 
 from .models import Category, HeroSlide, OfferBanner, PaymentSettings, Product, StoreSettings
@@ -162,6 +163,32 @@ def site_settings(request):
     return Response({
         "store": StoreSettingsSerializer(store, context=context).data,
         "payment": PaymentSettingsSerializer(payment, context=context).data,
+    })
+
+
+
+@api_view(["POST"])
+@permission_classes([permissions.AllowAny])
+@authentication_classes([])
+def admin_login(request):
+    username = (request.data.get("username") or "").strip()
+    password = request.data.get("password") or ""
+
+    if not username or not password:
+        return Response({"detail": "???? ??? ???????? ????? ??????."}, status=400)
+
+    user = authenticate(request, username=username, password=password)
+
+    if not user or not user.is_active or not user.is_staff:
+        return Response({"detail": "?????? ?????? ??? ????? ?? ???????? ?? ???? ?????? ???????."}, status=403)
+
+    token = getattr(settings, "SMM_ADMIN_API_TOKEN", "").strip()
+    if not token:
+        return Response({"detail": "???? ???? ??????? ??? ????? ??? ???????."}, status=500)
+
+    return Response({
+        "token": token,
+        "username": user.get_username(),
     })
 
 
