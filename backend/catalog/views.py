@@ -105,6 +105,7 @@ class OfferBannerViewSet(viewsets.ReadOnlyModelViewSet):
 class AdminCategoryViewSet(viewsets.ModelViewSet):
     serializer_class = CategorySerializer
     permission_classes = [AdminTokenPermission]
+    authentication_classes = []
 
     def get_queryset(self):
         return (
@@ -117,6 +118,7 @@ class AdminCategoryViewSet(viewsets.ModelViewSet):
 class AdminProductViewSet(viewsets.ModelViewSet):
     serializer_class = ProductSerializer
     permission_classes = [AdminTokenPermission]
+    authentication_classes = []
     pagination_class = ProductPagination
 
     def get_queryset(self):
@@ -140,12 +142,14 @@ class AdminProductViewSet(viewsets.ModelViewSet):
 class AdminHeroSlideViewSet(viewsets.ModelViewSet):
     serializer_class = HeroSlideSerializer
     permission_classes = [AdminTokenPermission]
+    authentication_classes = []
     queryset = HeroSlide.objects.all().order_by("order", "id")
 
 
 class AdminOfferBannerViewSet(viewsets.ModelViewSet):
     serializer_class = OfferBannerSerializer
     permission_classes = [AdminTokenPermission]
+    authentication_classes = []
     queryset = OfferBanner.objects.all().order_by("order", "id")
 
 
