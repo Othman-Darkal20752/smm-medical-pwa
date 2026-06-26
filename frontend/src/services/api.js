@@ -2,14 +2,29 @@
   import.meta.env.VITE_API_BASE_URL ||
   (import.meta.env.DEV ? "http://127.0.0.1:8000/api" : "/api");
 
-async function request(path) {
-  const response = await fetch(`${API_BASE_URL}${path}`);
+async function request(path, options = {}) {
+  const response = await fetch(`${API_BASE_URL}${path}`, {
+    signal: options.signal,
+  });
 
   if (!response.ok) {
     throw new Error(`API request failed: ${response.status} ${path}`);
   }
 
   return response.json();
+}
+
+function buildQueryString(params = {}) {
+  const query = new URLSearchParams();
+
+  Object.entries(params).forEach(([key, value]) => {
+    if (value !== undefined && value !== null && value !== "" && value !== "الكل") {
+      query.set(key, value);
+    }
+  });
+
+  const suffix = query.toString();
+  return suffix ? `?${suffix}` : "";
 }
 
 function formatSypPrice(value) {
@@ -25,18 +40,25 @@ export function mapApiCategoryToName(category) {
 }
 
 export function mapApiProductToUiProduct(product) {
-  const priceSyp = product.price_syp;
-  const priceUsd =
+  const parsedPriceSyp =
+    product.price_syp === null || product.price_syp === undefined
+      ? null
+      : Number(product.price_syp);
+  const priceSyp = Number.isFinite(parsedPriceSyp) ? parsedPriceSyp : null;
+  const parsedPriceUsd =
     product.price_usd === null || product.price_usd === undefined
       ? null
       : Number(product.price_usd);
+  const priceUsd = Number.isFinite(parsedPriceUsd) ? parsedPriceUsd : null;
 
   return {
     id: product.id,
     name: product.name,
     category: product.category?.name || "",
+    categoryId: product.category?.id || product.category_id || null,
     description: product.description || "",
     image: product.image,
+    updated_at: product.updated_at || product.updatedAt || product.modified_at || "",
     priceUsd,
     priceSyp,
     price: priceUsd === null ? "السعر عند الطلب" : `$${priceUsd.toFixed(2)}`,
@@ -57,28 +79,20 @@ export function mapApiProductToUiProduct(product) {
   };
 }
 
-export async function fetchSiteSettings() {
-  return request("/settings/");
+export async function fetchSiteSettings(options = {}) {
+  return request("/settings/", options);
 }
 
-export async function fetchCategories() {
-  const data = await request("/categories/");
+export async function fetchCategories(options = {}) {
+  const data = await request("/categories/", options);
   const list = Array.isArray(data.results) ? data.results : data;
 
   return ["الكل", ...list.map(mapApiCategoryToName)];
 }
 
-export async function fetchProducts(params = {}) {
-  const query = new URLSearchParams();
-
-  Object.entries(params).forEach(([key, value]) => {
-    if (value !== undefined && value !== null && value !== "" && value !== "الكل") {
-      query.set(key, value);
-    }
-  });
-
-  const suffix = query.toString() ? `?${query.toString()}` : "";
-  const data = await request(`/products/${suffix}`);
+export async function fetchProducts(params = {}, options = {}) {
+  const suffix = buildQueryString(params);
+  const data = await request(`/products/${suffix}`, options);
   const list = Array.isArray(data.results) ? data.results : data;
 
   return {
@@ -87,4 +101,11 @@ export async function fetchProducts(params = {}) {
     next: data.next ?? null,
     previous: data.previous ?? null,
   };
+}
+
+export async function fetchProduct(productId, options = {}) {
+  const safeProductId = encodeURIComponent(String(productId));
+  const data = await request(`/products/${safeProductId}/`, options);
+
+  return mapApiProductToUiProduct(data);
 }

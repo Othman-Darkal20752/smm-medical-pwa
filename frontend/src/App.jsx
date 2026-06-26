@@ -16,7 +16,12 @@ import { categories } from "./data/categories";
 import { offers } from "./data/offers";
 import { products as initialProducts } from "./data/products";
 
-import { fetchCategories, fetchProducts, fetchSiteSettings } from "./services/api";
+import {
+  fetchCategories,
+  fetchProduct,
+  fetchProducts,
+  fetchSiteSettings,
+} from "./services/api";
 
 import { useAutoHorizontalScroll } from "./hooks/useAutoHorizontalScroll";
 
@@ -64,6 +69,9 @@ const paymentMethods = [
 ];
 
 const DEFAULT_PAYMENT_METHOD = paymentMethods[0].id;
+const HOME_PRODUCTS_PRELOAD_SIZE = 24;
+const PRODUCTS_PAGE_SEARCH_DELAY = 350;
+
 
 function getProductIdFromPath(pathname) {
   const match = pathname.match(/^\/products\/([^/]+)\/?$/);
@@ -170,6 +178,28 @@ function isInstallSupportedDevice() {
   );
 }
 
+function upsertProductById(products, product) {
+  if (!product?.id) return products;
+
+  const productId = String(product.id);
+  const existingIndex = products.findIndex(
+    (entry) => String(entry.id) === productId
+  );
+
+  if (existingIndex === -1) {
+    return [product, ...products];
+  }
+
+  return products.map((entry, index) =>
+    index === existingIndex ? { ...entry, ...product } : entry
+  );
+}
+
+function upsertProductsById(products, nextProducts) {
+  return nextProducts.reduce(upsertProductById, products);
+}
+
+
 function App() {
   const [currentPath, setCurrentPath] = useState(() => window.location.pathname);
 
@@ -193,9 +223,17 @@ function App() {
   const [theme, setTheme] = useState(() => {
     return localStorage.getItem("smm_theme") || "light";
   });
-  const [visibleProductCount, setVisibleProductCount] = useState(() =>
-    getProductsPageSize()
+  const [catalogProducts, setCatalogProducts] = useState(() =>
+    initialProducts.slice(0, getProductsPageSize())
   );
+  const [catalogCount, setCatalogCount] = useState(initialProducts.length);
+  const [catalogPage, setCatalogPage] = useState(1);
+  const [catalogNext, setCatalogNext] = useState(null);
+  const [catalogLoading, setCatalogLoading] = useState(false);
+  const [catalogLoadingMore, setCatalogLoadingMore] = useState(false);
+  const [catalogError, setCatalogError] = useState("");
+  const [productDetailsById, setProductDetailsById] = useState({});
+  const [productDetailsStatus, setProductDetailsStatus] = useState({});
 
   const [installEvent, setInstallEvent] = useState(null);
   const [installHelpOpen, setInstallHelpOpen] = useState(false);
@@ -207,6 +245,9 @@ function App() {
   const productRowRef = useRef(null);
   const bestSellerRowRef = useRef(null);
   const searchInputRef = useRef(null);
+  const productsLoadMoreRef = useRef(null);
+  const productsRequestIdRef = useRef(0);
+  const productListRef = useRef(productList);
 
   const whatsappUrl = `https://wa.me/${storeInfo.whatsappRaw}`;
 
@@ -219,7 +260,7 @@ function App() {
           await Promise.all([
             fetchSiteSettings(),
             fetchCategories(),
-            fetchProducts({ page_size: 60 }),
+            fetchProducts({ page_size: HOME_PRODUCTS_PRELOAD_SIZE }),
           ]);
 
         if (cancelled) return;
@@ -344,10 +385,8 @@ function App() {
   }, [theme]);
 
   useEffect(() => {
-    if (activePage === "products") {
-      setVisibleProductCount(getProductsPageSize());
-    }
-  }, [activePage, activeCategory, searchQuery]);
+    productListRef.current = productList;
+  }, [productList]);
 
   const navigateToPath = (path, nextPage = "home") => {
     window.history.replaceState(
@@ -383,15 +422,225 @@ function App() {
     });
   }, [activeCategory, searchQuery, productList]);
 
-  const visibleProducts = useMemo(() => {
-    return filteredProducts.slice(0, visibleProductCount);
-  }, [filteredProducts, visibleProductCount]);
+  const isProductsCatalogPage =
+    activePage === "products" && getProductIdFromPath(currentPath) === null;
+  const hasMoreCatalogProducts =
+    Boolean(catalogNext) || catalogProducts.length < catalogCount;
 
-  const hasMoreProducts = visibleProductCount < filteredProducts.length;
+  useEffect(() => {
+    if (!isProductsCatalogPage) return;
 
-  const handleShowMoreProducts = () => {
-    setVisibleProductCount((count) => count + getProductsPageSize());
-  };
+    let cancelled = false;
+    const requestId = productsRequestIdRef.current + 1;
+    productsRequestIdRef.current = requestId;
+    const search = searchQuery.trim();
+    const delay = search ? PRODUCTS_PAGE_SEARCH_DELAY : 0;
+
+    const timeoutId = window.setTimeout(async () => {
+      setCatalogLoading(true);
+      setCatalogLoadingMore(false);
+      setCatalogError("");
+
+      try {
+        const response = await fetchProducts({
+          page: 1,
+          page_size: getProductsPageSize(),
+          search,
+          category: activeCategory,
+        });
+
+        if (cancelled || productsRequestIdRef.current !== requestId) return;
+
+        setCatalogProducts(response.products);
+        setCatalogCount(response.count);
+        setCatalogPage(1);
+        setCatalogNext(response.next);
+
+        if (response.products.length > 0) {
+          setProductList((products) =>
+            upsertProductsById(products, response.products)
+          );
+        }
+      } catch (error) {
+        if (cancelled || productsRequestIdRef.current !== requestId) return;
+
+        console.warn("Using local fallback products page data:", error);
+
+        const fallbackProducts = productListRef.current.filter((product) => {
+          const matchesCategory =
+            activeCategory === "الكل" || product.category === activeCategory;
+          const query = search.toLowerCase();
+          const matchesSearch =
+            !query ||
+            product.name.toLowerCase().includes(query) ||
+            product.category.toLowerCase().includes(query) ||
+            product.tag.toLowerCase().includes(query);
+
+          return matchesCategory && matchesSearch;
+        });
+
+        setCatalogProducts(fallbackProducts.slice(0, getProductsPageSize()));
+        setCatalogCount(fallbackProducts.length);
+        setCatalogPage(1);
+        setCatalogNext(null);
+        setCatalogError(
+          "تعذر الاتصال بقاعدة البيانات حالياً، لذلك تم عرض نسخة محلية مؤقتة."
+        );
+      } finally {
+        if (!cancelled && productsRequestIdRef.current === requestId) {
+          setCatalogLoading(false);
+        }
+      }
+    }, delay);
+
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timeoutId);
+    };
+  }, [activeCategory, isProductsCatalogPage, searchQuery]);
+
+  useEffect(() => {
+    if (
+      !isProductsCatalogPage ||
+      !hasMoreCatalogProducts ||
+      catalogLoading ||
+      catalogLoadingMore ||
+      !("IntersectionObserver" in window)
+    ) {
+      return undefined;
+    }
+
+    const target = productsLoadMoreRef.current;
+
+    if (!target) return undefined;
+
+    let cancelled = false;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (!entries[0]?.isIntersecting || cancelled) return;
+
+        const nextPage = catalogPage + 1;
+
+        async function loadNextPage() {
+          setCatalogLoadingMore(true);
+
+          try {
+            const response = await fetchProducts({
+              page: nextPage,
+              page_size: getProductsPageSize(),
+              search: searchQuery.trim(),
+              category: activeCategory,
+            });
+
+            if (cancelled) return;
+
+            setCatalogProducts((products) => {
+              const existingIds = new Set(
+                products.map((product) => String(product.id))
+              );
+              const nextProducts = response.products.filter(
+                (product) => !existingIds.has(String(product.id))
+              );
+
+              return [...products, ...nextProducts];
+            });
+            setCatalogCount(response.count);
+            setCatalogPage(nextPage);
+            setCatalogNext(response.next);
+
+            if (response.products.length > 0) {
+              setProductList((products) =>
+                upsertProductsById(products, response.products)
+              );
+            }
+          } catch (error) {
+            if (!cancelled) {
+              console.warn("Failed to load next products page:", error);
+              setCatalogNext(null);
+              setCatalogError(
+                "تعذر تحميل المزيد من قاعدة البيانات. جرّب تحديث الصفحة لاحقاً."
+              );
+            }
+          } finally {
+            if (!cancelled) {
+              setCatalogLoadingMore(false);
+            }
+          }
+        }
+
+        observer.unobserve(target);
+        loadNextPage();
+      },
+      { rootMargin: "520px 0px" }
+    );
+
+    observer.observe(target);
+
+    return () => {
+      cancelled = true;
+      observer.disconnect();
+    };
+  }, [
+    activeCategory,
+    catalogLoading,
+    catalogLoadingMore,
+    catalogPage,
+    hasMoreCatalogProducts,
+    isProductsCatalogPage,
+    searchQuery,
+  ]);
+
+  useEffect(() => {
+    const productId = getProductIdFromPath(currentPath);
+
+    if (productId === null) return;
+
+    const productKey = String(productId);
+    const existingProduct =
+      productList.find((entry) => String(entry.id) === productKey) ||
+      productDetailsById[productKey];
+
+    if (existingProduct) return;
+
+    let cancelled = false;
+
+    setProductDetailsStatus((statuses) => ({
+      ...statuses,
+      [productKey]: "loading",
+    }));
+
+    async function loadProductDetails() {
+      try {
+        const product = await fetchProduct(productKey);
+
+        if (cancelled) return;
+
+        setProductDetailsById((products) => ({
+          ...products,
+          [productKey]: product,
+        }));
+        setProductList((products) => upsertProductById(products, product));
+        setProductDetailsStatus((statuses) => ({
+          ...statuses,
+          [productKey]: "ready",
+        }));
+      } catch (error) {
+        if (!cancelled) {
+          console.warn("Failed to load product details:", error);
+          setProductDetailsStatus((statuses) => ({
+            ...statuses,
+            [productKey]: "error",
+          }));
+        }
+      }
+    }
+
+    loadProductDetails();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [currentPath, productDetailsById, productList]);
 
   const newProducts = useMemo(() => {
     const list = productList.filter((product) => product.is_new);
@@ -445,7 +694,7 @@ function App() {
   const cartProducts = useMemo(() => {
     return cartItems
       .map((item) => {
-        const product = productList.find((entry) => entry.id === item.productId);
+        const product = productList.find((entry) => String(entry.id) === String(item.productId));
 
         if (!product) return null;
 
@@ -665,7 +914,7 @@ ${STORE_SHIPPING_TEXT}${
   };
 
   const getCartQuantity = (productId) => {
-    return cartItems.find((item) => item.productId === productId)?.quantity || 0;
+    return cartItems.find((item) => String(item.productId) === String(productId))?.quantity || 0;
   };
 
   const renderProductCards = (products) => {
@@ -818,86 +1067,100 @@ ${STORE_SHIPPING_TEXT}${
   );
 
   const renderProductsPage = () => {
-  const remainingProductsCount = Math.max(
-    filteredProducts.length - visibleProducts.length,
-    0
-  );
+    const totalProductsCount = catalogCount || catalogProducts.length;
+    const loadedProductsCount = catalogProducts.length;
+    const hasActiveFilters =
+      activeCategory !== "الكل" || Boolean(searchQuery.trim());
+    const isInitialProductsLoading = catalogLoading && loadedProductsCount === 0;
 
-  const hasActiveFilters = activeCategory !== "الكل" || Boolean(searchQuery.trim());
-
-  return (
-    <>
-      <section className="page-head">
-        <span>كتالوج المنتجات</span>
-        <h1>المنتجات الطبية</h1>
-        <p>
-          اختر التصنيف المناسب وشاهد المنتجات المتوفرة في مول صحنايا الطبي.
-        </p>
-      </section>
-
-      <CategoryStrip
-        categories={categoryList}
-        activeCategory={activeCategory}
-        onChange={handleCategoryChange}
-      />
-
-      <section className="products-summary-card">
-        <div className="products-summary-main">
-          <span className="products-status-pill">
-            {activeCategory === "الكل" ? "كل التصنيفات" : activeCategory}
-          </span>
-
-          <h2>
-            {activeCategory === "الكل" ? "كل المنتجات" : activeCategory}
-          </h2>
-
+    return (
+      <>
+        <section className="page-head">
+          <span>كتالوج المنتجات</span>
+          <h1>المنتجات الطبية</h1>
           <p>
-            {searchQuery.trim()
-              ? `نتائج البحث عن: "${searchQuery.trim()}"`
-              : "تصفح المنتجات حسب التصنيف أو استخدم البحث للوصول للمنتج المطلوب بسرعة."}
+            اختر التصنيف المناسب وشاهد المنتجات المتوفرة في مول صحنايا الطبي.
           </p>
-        </div>
+        </section>
 
-        <div className="products-summary-meta">
-          <strong>{filteredProducts.length}</strong>
-          <span>منتج مطابق</span>
-        </div>
-      </section>
+        <CategoryStrip
+          categories={categoryList}
+          activeCategory={activeCategory}
+          onChange={handleCategoryChange}
+        />
 
-      <section className="section-block products-list-section">
-        <div className="products-toolbar">
-          <div>
-            <span>المعروض حالياً</span>
-            <strong>
-              {visibleProducts.length} من {filteredProducts.length}
-            </strong>
+        <section className="products-summary-card">
+          <div className="products-summary-main">
+            <span className="products-status-pill">
+              {activeCategory === "الكل" ? "كل التصنيفات" : activeCategory}
+            </span>
+
+            <h2>
+              {activeCategory === "الكل" ? "كل المنتجات" : activeCategory}
+            </h2>
+
+            <p>
+              {searchQuery.trim()
+                ? `نتائج البحث من قاعدة البيانات عن: "${searchQuery.trim()}"`
+                : "تصفح المنتجات من قاعدة البيانات حسب التصنيف أو استخدم البحث للوصول للمنتج المطلوب بسرعة."}
+            </p>
           </div>
 
-          {hasActiveFilters && (
-            <button type="button" onClick={resetFilters}>
-              مسح الفلترة
-              <ChevronLeft size={19} />
-            </button>
+          <div className="products-summary-meta">
+            <strong>{isInitialProductsLoading ? "..." : totalProductsCount}</strong>
+            <span>منتج مطابق</span>
+          </div>
+        </section>
+
+        <section className="section-block products-list-section">
+          <div className="products-toolbar">
+            <div>
+              <span>المعروض حالياً</span>
+              <strong>
+                {loadedProductsCount} من {totalProductsCount}
+              </strong>
+            </div>
+
+            {hasActiveFilters && (
+              <button type="button" onClick={resetFilters}>
+                مسح الفلترة
+                <ChevronLeft size={19} />
+              </button>
+            )}
+          </div>
+
+          {catalogError && (
+            <p className="products-api-note">{catalogError}</p>
           )}
-        </div>
 
-        {renderProductCards(visibleProducts)}
+          {isInitialProductsLoading ? (
+            <div className="products-loading-card">
+              <ShoppingCart size={28} />
+              <strong>جاري تحميل المنتجات من قاعدة البيانات...</strong>
+              <span>يتم جلب النتائج حسب البحث والتصنيف الحالي.</span>
+            </div>
+          ) : (
+            renderProductCards(catalogProducts)
+          )}
 
-        {hasMoreProducts && (
-          <div className="load-more-wrap">
-            <button type="button" onClick={handleShowMoreProducts}>
-              عرض المزيد من المنتجات
-              <span>{visibleProducts.length} / {filteredProducts.length}</span>
-            </button>
+          {hasMoreCatalogProducts && !catalogError && (
+            <div className="infinite-scroll-sentinel" ref={productsLoadMoreRef}>
+              {catalogLoadingMore ? (
+                <span>جاري تحميل المزيد من المنتجات...</span>
+              ) : (
+                <span>مرر للأسفل لتحميل المزيد تلقائياً</span>
+              )}
+            </div>
+          )}
 
-            <small>
-              بقي {remainingProductsCount} منتج ضمن النتائج الحالية
-            </small>
-          </div>
-        )}
-      </section>
-    </>
-  );
+          {!hasMoreCatalogProducts && loadedProductsCount > 0 && !catalogLoading && (
+            <div className="products-end-message">
+              تم عرض كل المنتجات المطابقة.
+            </div>
+          )}
+        </section>
+      </>
+    );
   };
 
   const renderOffersPage = () => (
@@ -1144,9 +1407,11 @@ ${STORE_SHIPPING_TEXT}${
     const productId = getProductIdFromPath(currentPath);
 
     if (productId !== null) {
-      const product = productList.find(
-        (entry) => String(entry.id) === String(productId)
-      );
+      const productKey = String(productId);
+      const product =
+        productList.find((entry) => String(entry.id) === productKey) ||
+        productDetailsById[productKey];
+      const productStatus = productDetailsStatus[productKey];
       const similarProducts = product
         ? productList
             .filter(
@@ -1156,6 +1421,29 @@ ${STORE_SHIPPING_TEXT}${
             )
             .slice(0, 4)
         : [];
+
+      if (!product && productStatus === "loading") {
+        return (
+          <section className="page-head product-detail-loading">
+            <span>تفاصيل المنتج</span>
+            <h1>جاري تحميل المنتج...</h1>
+            <p>يتم جلب بيانات المنتج مباشرة من قاعدة البيانات.</p>
+          </section>
+        );
+      }
+
+      if (!product && productStatus === "error") {
+        return (
+          <section className="page-head product-detail-loading">
+            <span>تفاصيل المنتج</span>
+            <h1>تعذر تحميل المنتج</h1>
+            <p>تأكد من الاتصال أو ارجع إلى صفحة المنتجات وحاول مرة أخرى.</p>
+            <button type="button" onClick={() => handlePageChange("products")}>
+              العودة للمنتجات
+            </button>
+          </section>
+        );
+      }
 
       return (
         <ProductDetailsPage
