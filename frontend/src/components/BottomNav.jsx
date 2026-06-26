@@ -1,27 +1,37 @@
-import { Home, MessageCircle, Package, Percent, ShoppingCart } from "lucide-react";
+import {
+  BadgePercent,
+  Home,
+  MessageCircle,
+  PackageSearch,
+  ShoppingCart,
+} from "lucide-react";
 
 const navItems = [
   { id: "home", label: "الرئيسية", icon: Home },
-  { id: "products", label: "المنتجات", icon: Package },
-  { id: "offers", label: "العروض", icon: Percent },
+  { id: "products", label: "المنتجات", icon: PackageSearch },
+  { id: "offers", label: "العروض", icon: BadgePercent },
   { id: "cart", label: "السلة", icon: ShoppingCart },
   { id: "contact", label: "تواصل", icon: MessageCircle },
 ];
 
 function BottomNav({ activeNav, onNavigate }) {
   return (
-    <nav className="bottom-nav">
+    <nav className="bottom-nav smm-stage5-bottom-nav" aria-label="التنقل السفلي">
       {navItems.map((item) => {
         const Icon = item.icon;
+        const isActive = activeNav === item.id;
 
         return (
           <button
             key={item.id}
             type="button"
-            className={activeNav === item.id ? "active" : ""}
+            className={isActive ? "active" : ""}
             onClick={() => onNavigate(item.id)}
+            aria-current={isActive ? "page" : undefined}
           >
-            <Icon size={25} />
+            <span className="bottom-nav-icon">
+              <Icon size={21} />
+            </span>
             <span>{item.label}</span>
           </button>
         );

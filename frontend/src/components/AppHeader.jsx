@@ -1,18 +1,21 @@
 import {
+  BadgePercent,
   Menu,
   MessageCircle,
   Moon,
+  PackageSearch,
+  Phone,
   Search,
   ShoppingCart,
   Sun,
 } from "lucide-react";
+
 import { storeInfo } from "../data/storeInfo";
 
-const navItems = [
-  { id: "home", label: "الرئيسية" },
-  { id: "products", label: "المنتجات" },
-  { id: "offers", label: "العروض" },
-  { id: "contact", label: "تواصل معنا" },
+const desktopNavItems = [
+  { id: "products", label: "المنتجات", icon: PackageSearch },
+  { id: "offers", label: "العروض", icon: BadgePercent },
+  { id: "contact", label: "تواصل معنا", icon: Phone },
 ];
 
 function AppHeader({
@@ -28,104 +31,111 @@ function AppHeader({
   theme,
   onToggleTheme,
 }) {
-  const ThemeIcon = theme === "dark" ? Sun : Moon;
+  const isDark = theme === "dark";
+  const ThemeIcon = isDark ? Sun : Moon;
 
   return (
-    <header className="site-header">
+    <header className="site-header smm-stage5-navbar">
       <div className="header-service-strip">
-        <span>منتجات موثوقة ومرخصة</span>
-        <span>توصيل سريع</span>
-        <span>خدمة 7 أيام</span>
-        <span className="header-service-location">{storeInfo.location}</span>
+        <span>شحن لكافة المحافظات السورية</span>
+        <span>أسعار بالدولار والليرة السورية</span>
+        <span className="header-service-location">صحنايا، سوريا</span>
       </div>
 
-      <div className="top-bar">
+      <div className="top-bar smm-stage5-topbar">
         <button
           className="icon-button mobile-menu-button"
           type="button"
-          aria-label="القائمة"
           onClick={onOpenDrawer}
+          aria-label="فتح القائمة"
         >
-          <Menu size={30} />
+          <Menu size={25} />
         </button>
 
         <button
-          className="theme-toggle-button mobile-theme-toggle"
+          className="brand-logo-button smm-stage5-brand"
           type="button"
-          aria-label="تبديل الوضع"
-          onClick={onToggleTheme}
-        >
-          <ThemeIcon size={20} />
-        </button>
-
-        <button
-          className="brand-logo-button"
-          type="button"
-          aria-label="العودة للرئيسية"
           onClick={() => onNavigate("home")}
+          aria-label="العودة للرئيسية"
         >
           <img src={storeInfo.logo} alt={storeInfo.name} />
           <span>
-            <strong>{storeInfo.shortName}</strong>
-            <small>{storeInfo.name}</small>
+            <strong>SMM</strong>
+            <small>مول صحنايا الطبي</small>
           </span>
         </button>
 
-        <nav className="desktop-nav" aria-label="التنقل الرئيسي">
-          {navItems.map((item) => (
-            <button
-              key={item.id}
-              type="button"
-              className={activePage === item.id ? "active" : ""}
-              onClick={() => onNavigate(item.id)}
-            >
-              {item.label}
-            </button>
-          ))}
-        </nav>
-
-        <div className="search-box">
+        <div className="search-box smm-stage5-search">
           <Search size={20} />
-
           <input
             ref={searchInputRef}
+            type="search"
             value={searchQuery}
             onChange={(event) => onSearchChange(event.target.value)}
-            placeholder="ابحث عن جهاز، مستلزم، مادة سنية..."
+            placeholder="ابحث عن منتج طبي..."
+            aria-label="بحث عن المنتجات"
           />
         </div>
 
-        <div className="header-actions">
-          <button
-            className="theme-toggle-button"
-            type="button"
-            aria-label="تبديل الوضع"
-            onClick={onToggleTheme}
-          >
-            <ThemeIcon size={20} />
-          </button>
+        <nav className="desktop-nav smm-stage5-desktop-nav" aria-label="روابط الموقع الرئيسية">
+          {desktopNavItems.map((item) => {
+            const Icon = item.icon;
 
+            return (
+              <button
+                key={item.id}
+                type="button"
+                className={activePage === item.id ? "active" : ""}
+                onClick={() => onNavigate(item.id)}
+              >
+                <Icon size={18} />
+                <span>{item.label}</span>
+              </button>
+            );
+          })}
+        </nav>
+
+        <div className="header-actions smm-stage5-actions">
           <a
             className="desktop-whatsapp-button"
             href={whatsappUrl}
             target="_blank"
             rel="noreferrer"
+            aria-label="تواصل عبر واتساب"
           >
             <MessageCircle size={19} />
-            واتساب
+            <span>واتساب</span>
           </a>
 
           <button
             className="cart-header-button"
             type="button"
-            aria-label="السلة"
             onClick={onCartClick}
+            aria-label={`السلة تحتوي على ${cartCount} منتج`}
           >
-            <ShoppingCart size={25} />
+            <ShoppingCart size={20} />
             <span>السلة</span>
-            <b>{cartCount}</b>
+            {cartCount > 0 && <b>{cartCount}</b>}
+          </button>
+
+          <button
+            className="theme-toggle-button"
+            type="button"
+            onClick={onToggleTheme}
+            aria-label={isDark ? "تفعيل الوضع الفاتح" : "تفعيل الوضع الداكن"}
+          >
+            <ThemeIcon size={20} />
           </button>
         </div>
+
+        <button
+          className="icon-button mobile-theme-toggle"
+          type="button"
+          onClick={onToggleTheme}
+          aria-label={isDark ? "تفعيل الوضع الفاتح" : "تفعيل الوضع الداكن"}
+        >
+          <ThemeIcon size={21} />
+        </button>
       </div>
     </header>
   );
