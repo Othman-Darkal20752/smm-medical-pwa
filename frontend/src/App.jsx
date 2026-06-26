@@ -33,6 +33,7 @@ import DrawerMenu from "./components/DrawerMenu";
 import EmptyState from "./components/EmptyState";
 import InstallPrompt from "./components/InstallPrompt";
 import ProductDetailsPage from "./pages/ProductDetailsPage";
+import AdminDashboard from "./pages/AdminDashboard";
 
 
 const CART_STORAGE_KEY = "smm_medical_cart";
@@ -1852,28 +1853,11 @@ ${STORE_SHIPPING_TEXT}${
 
 if (currentPath.startsWith("/admin")) {
   return (
-    <div className="admin-shell" dir="rtl">
-      <header className="admin-hero">
-        <button
-          className="admin-back-btn"
-          type="button"
-          onClick={() => {
-            window.location.href = "/";
-          }}
-        >
-          رجوع للتطبيق
-        </button>
-
-        <div>
-          <span>لوحة إدارة SMM</span>
-          <h1>قيد الربط بالباكند</h1>
-          <p>
-            تم إيقاف لوحة الإدارة التجريبية مؤقتًا. سيتم استبدالها بلوحة حقيقية
-            مرتبطة بقاعدة البيانات مثل G4.
-          </p>
-        </div>
-      </header>
-    </div>
+    <AdminDashboard
+      onBackToApp={() => {
+        window.location.href = "/";
+      }}
+    />
   );
 }
 

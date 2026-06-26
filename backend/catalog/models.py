@@ -184,16 +184,45 @@ class StoreSettings(models.Model):
         max_length=220,
         default="كل ما يلزم الطبيب والمريض تجده هنا",
     )
+
     whatsapp_number = models.CharField("رقم الواتساب", max_length=40, default="+963945151299")
+    facebook_url = models.URLField("رابط فيسبوك", max_length=500, blank=True)
     location = models.CharField("الموقع المختصر", max_length=220, default="صحنايا")
     address = models.TextField("العنوان التفصيلي", blank=True)
+    map_url = models.URLField("رابط الموقع على الخريطة", max_length=500, blank=True)
+    shipping_note = models.CharField(
+        "ملاحظة الشحن",
+        max_length=220,
+        default="شحن لكافة المحافظات السورية",
+    )
+
     exchange_rate = models.PositiveIntegerField("سعر صرف الدولار", default=13000)
-    logo = models.ImageField("الشعار", upload_to="settings/", blank=True, null=True)
     products_page_size = models.PositiveIntegerField("عدد المنتجات في الصفحة", default=12)
 
+    logo = models.ImageField("الشعار", upload_to="settings/", blank=True, null=True)
+    app_icon = models.ImageField("أيقونة التطبيق", upload_to="settings/", blank=True, null=True)
+    static_hero_desktop = models.ImageField(
+        "صورة الهيرو الثابتة للديسكتوب",
+        upload_to="settings/hero/",
+        blank=True,
+        null=True,
+    )
+    static_hero_mobile = models.ImageField(
+        "صورة الهيرو الثابتة للجوال",
+        upload_to="settings/hero/",
+        blank=True,
+        null=True,
+    )
+
+    show_hero_section = models.BooleanField("إظهار قسم الهيرو", default=True)
+    show_offers_section = models.BooleanField("إظهار قسم العروض", default=True)
+    show_new_products_section = models.BooleanField("إظهار قسم جديدنا", default=True)
+    show_best_sellers_section = models.BooleanField("إظهار قسم الأكثر طلباً", default=True)
+    show_categories_section = models.BooleanField("إظهار قسم التصنيفات", default=True)
+
     class Meta:
-        verbose_name = "إعدادات المتجر"
-        verbose_name_plural = "إعدادات المتجر"
+        verbose_name = "إعدادات الموقع"
+        verbose_name_plural = "إعدادات الموقع"
 
     @classmethod
     def load(cls):
@@ -202,6 +231,18 @@ class StoreSettings(models.Model):
 
     def save(self, *args, **kwargs):
         self.pk = 1
+
+        image_fields = (
+            ("logo", "logo"),
+            ("app_icon", "app-icon"),
+            ("static_hero_desktop", "hero-desktop"),
+            ("static_hero_mobile", "hero-mobile"),
+        )
+        for field_name, prefix in image_fields:
+            converted_image = convert_uploaded_image_to_webp(getattr(self, field_name), prefix=prefix)
+            if converted_image is not None:
+                setattr(self, field_name, converted_image)
+
         super().save(*args, **kwargs)
 
     def __str__(self):
@@ -243,6 +284,11 @@ class PaymentSettings(models.Model):
 
     def save(self, *args, **kwargs):
         self.pk = 1
+
+        converted_image = convert_uploaded_image_to_webp(self.sham_cash_qr, prefix="sham-cash")
+        if converted_image is not None:
+            self.sham_cash_qr = converted_image
+
         super().save(*args, **kwargs)
 
     def __str__(self):
@@ -262,6 +308,44 @@ class HeroSlide(models.Model):
         ordering = ["order", "id"]
         verbose_name = "شريحة رئيسية"
         verbose_name_plural = "شرائح الواجهة الرئيسية"
+
+    def save(self, *args, **kwargs):
+        desktop_image = convert_uploaded_image_to_webp(self.desktop_image, prefix="hero-desktop")
+        if desktop_image is not None:
+            self.desktop_image = desktop_image
+
+        mobile_image = convert_uploaded_image_to_webp(self.mobile_image, prefix="hero-mobile")
+        if mobile_image is not None:
+            self.mobile_image = mobile_image
+
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return self.title
+
+
+class OfferBanner(models.Model):
+    title = models.CharField("عنوان البانر", max_length=220)
+    subtitle = models.CharField("النص الفرعي", max_length=240, blank=True)
+    image = models.ImageField("صورة البانر", upload_to="offers/", blank=True, null=True)
+    link_label = models.CharField("نص الزر", max_length=120, blank=True)
+    link_url = models.CharField("رابط الزر أو المسار الداخلي", max_length=500, blank=True)
+    order = models.PositiveIntegerField("الترتيب", default=0)
+    is_active = models.BooleanField("مفعل", default=True)
+    created_at = models.DateTimeField("تاريخ الإنشاء", auto_now_add=True)
+    updated_at = models.DateTimeField("آخر تحديث", auto_now=True)
+
+    class Meta:
+        ordering = ["order", "id"]
+        verbose_name = "بانر عرض"
+        verbose_name_plural = "بنرات العروض"
+
+    def save(self, *args, **kwargs):
+        converted_image = convert_uploaded_image_to_webp(self.image, prefix="offer-banner")
+        if converted_image is not None:
+            self.image = converted_image
+
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.title

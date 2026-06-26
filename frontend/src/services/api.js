@@ -2,16 +2,68 @@ const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL ||
   (import.meta.env.DEV ? "http://127.0.0.1:8000/api" : "/api");
 
+const ADMIN_TOKEN_STORAGE_KEY = "smm-admin-api-token";
+
+export function getStoredAdminToken() {
+  return localStorage.getItem(ADMIN_TOKEN_STORAGE_KEY) || "";
+}
+
+export function saveStoredAdminToken(token) {
+  localStorage.setItem(ADMIN_TOKEN_STORAGE_KEY, token || "");
+}
+
+export function clearStoredAdminToken() {
+  localStorage.removeItem(ADMIN_TOKEN_STORAGE_KEY);
+}
+
+async function parseResponse(response, path) {
+  const contentType = response.headers.get("content-type") || "";
+  const isJson = contentType.includes("application/json");
+  const payload = response.status === 204 ? null : isJson ? await response.json() : await response.text();
+
+  if (!response.ok) {
+    const message =
+      payload?.detail ||
+      payload?.error ||
+      (typeof payload === "string" && payload) ||
+      `API request failed: ${response.status} ${path}`;
+    throw new Error(message);
+  }
+
+  return payload;
+}
+
 async function request(path, options = {}) {
   const response = await fetch(`${API_BASE_URL}${path}`, {
     signal: options.signal,
   });
 
-  if (!response.ok) {
-    throw new Error(`API request failed: ${response.status} ${path}`);
+  return parseResponse(response, path);
+}
+
+async function adminRequest(path, options = {}) {
+  const token = options.token || getStoredAdminToken();
+  const method = options.method || "GET";
+  const headers = {
+    ...(options.headers || {}),
+    "X-SMM-Admin-Token": token,
+  };
+
+  let body = options.body;
+
+  if (body && !(body instanceof FormData)) {
+    headers["Content-Type"] = "application/json";
+    body = JSON.stringify(body);
   }
 
-  return response.json();
+  const response = await fetch(`${API_BASE_URL}${path}`, {
+    method,
+    headers,
+    body,
+    signal: options.signal,
+  });
+
+  return parseResponse(response, path);
 }
 
 function buildQueryString(params = {}) {
@@ -83,6 +135,14 @@ export async function fetchSiteSettings(options = {}) {
   return request("/settings/", options);
 }
 
+export async function fetchHeroSlides(options = {}) {
+  return request("/hero-slides/", options);
+}
+
+export async function fetchOfferBanners(options = {}) {
+  return request("/offer-banners/", options);
+}
+
 export async function fetchCategories(options = {}) {
   const data = await request("/categories/", options);
   const list = Array.isArray(data.results) ? data.results : data;
@@ -108,4 +168,137 @@ export async function fetchProduct(productId, options = {}) {
   const data = await request(`/products/${safeProductId}/`, options);
 
   return mapApiProductToUiProduct(data);
+}
+
+export async function adminFetchSettings(options = {}) {
+  return adminRequest("/admin/settings/", options);
+}
+
+export async function adminUpdateSettings(payload, options = {}) {
+  return adminRequest("/admin/settings/", {
+    ...options,
+    method: "PATCH",
+    body: payload,
+  });
+}
+
+export async function adminFetchPaymentSettings(options = {}) {
+  return adminRequest("/admin/payment-settings/", options);
+}
+
+export async function adminUpdatePaymentSettings(payload, options = {}) {
+  return adminRequest("/admin/payment-settings/", {
+    ...options,
+    method: "PATCH",
+    body: payload,
+  });
+}
+
+export async function adminFetchCategories(options = {}) {
+  return adminRequest("/admin/categories/", options);
+}
+
+export async function adminCreateCategory(payload, options = {}) {
+  return adminRequest("/admin/categories/", {
+    ...options,
+    method: "POST",
+    body: payload,
+  });
+}
+
+export async function adminUpdateCategory(categoryId, payload, options = {}) {
+  return adminRequest(`/admin/categories/${categoryId}/`, {
+    ...options,
+    method: "PATCH",
+    body: payload,
+  });
+}
+
+export async function adminDeleteCategory(categoryId, options = {}) {
+  return adminRequest(`/admin/categories/${categoryId}/`, {
+    ...options,
+    method: "DELETE",
+  });
+}
+
+export async function adminFetchProducts(params = {}, options = {}) {
+  const suffix = buildQueryString(params);
+  return adminRequest(`/admin/products/${suffix}`, options);
+}
+
+export async function adminCreateProduct(payload, options = {}) {
+  return adminRequest("/admin/products/", {
+    ...options,
+    method: "POST",
+    body: payload,
+  });
+}
+
+export async function adminUpdateProduct(productId, payload, options = {}) {
+  return adminRequest(`/admin/products/${productId}/`, {
+    ...options,
+    method: "PATCH",
+    body: payload,
+  });
+}
+
+export async function adminDeleteProduct(productId, options = {}) {
+  return adminRequest(`/admin/products/${productId}/`, {
+    ...options,
+    method: "DELETE",
+  });
+}
+
+export async function adminFetchHeroSlides(options = {}) {
+  return adminRequest("/admin/hero-slides/", options);
+}
+
+export async function adminCreateHeroSlide(payload, options = {}) {
+  return adminRequest("/admin/hero-slides/", {
+    ...options,
+    method: "POST",
+    body: payload,
+  });
+}
+
+export async function adminUpdateHeroSlide(slideId, payload, options = {}) {
+  return adminRequest(`/admin/hero-slides/${slideId}/`, {
+    ...options,
+    method: "PATCH",
+    body: payload,
+  });
+}
+
+export async function adminDeleteHeroSlide(slideId, options = {}) {
+  return adminRequest(`/admin/hero-slides/${slideId}/`, {
+    ...options,
+    method: "DELETE",
+  });
+}
+
+export async function adminFetchOfferBanners(options = {}) {
+  return adminRequest("/admin/offer-banners/", options);
+}
+
+export async function adminCreateOfferBanner(payload, options = {}) {
+  return adminRequest("/admin/offer-banners/", {
+    ...options,
+    method: "POST",
+    body: payload,
+  });
+}
+
+export async function adminUpdateOfferBanner(bannerId, payload, options = {}) {
+  return adminRequest(`/admin/offer-banners/${bannerId}/`, {
+    ...options,
+    method: "PATCH",
+    body: payload,
+  });
+}
+
+export async function adminDeleteOfferBanner(bannerId, options = {}) {
+  return adminRequest(`/admin/offer-banners/${bannerId}/`, {
+    ...options,
+    method: "DELETE",
+  });
 }

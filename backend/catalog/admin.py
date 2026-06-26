@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Category, HeroSlide, PaymentSettings, Product, StoreSettings
+from .models import Category, HeroSlide, OfferBanner, PaymentSettings, Product, StoreSettings
 
 admin.site.site_header = "لوحة إدارة مول صحنايا الطبي"
 admin.site.site_title = "إدارة SMM"
@@ -88,26 +88,45 @@ class ProductAdmin(admin.ModelAdmin):
 @admin.register(StoreSettings)
 class StoreSettingsAdmin(admin.ModelAdmin):
     fieldsets = (
-        ("هوية المتجر", {
+        ("هوية الموقع", {
             "fields": (
                 "site_name",
                 "english_name",
                 "short_name",
                 "tagline",
                 "logo",
+                "app_icon",
             )
         }),
         ("معلومات التواصل", {
             "fields": (
                 "whatsapp_number",
+                "facebook_url",
                 "location",
                 "address",
+                "map_url",
+                "shipping_note",
             )
         }),
-        ("إعدادات الكتالوج", {
+        ("إعدادات الكتالوج والأسعار", {
             "fields": (
                 "exchange_rate",
                 "products_page_size",
+            )
+        }),
+        ("صور الهيرو الثابتة", {
+            "fields": (
+                "static_hero_desktop",
+                "static_hero_mobile",
+            )
+        }),
+        ("إظهار وإخفاء أقسام الصفحة الرئيسية", {
+            "fields": (
+                "show_hero_section",
+                "show_categories_section",
+                "show_offers_section",
+                "show_new_products_section",
+                "show_best_sellers_section",
             )
         }),
     )
@@ -171,5 +190,40 @@ class HeroSlideAdmin(admin.ModelAdmin):
                 "order",
                 "is_active",
             )
+        }),
+    )
+
+
+@admin.register(OfferBanner)
+class OfferBannerAdmin(admin.ModelAdmin):
+    list_display = ("title", "order", "is_active", "updated_at")
+    list_editable = ("order", "is_active")
+    search_fields = ("title", "subtitle", "link_url")
+    list_filter = ("is_active",)
+    ordering = ("order", "id")
+    readonly_fields = ("created_at", "updated_at")
+    fieldsets = (
+        ("محتوى البانر", {
+            "fields": (
+                "title",
+                "subtitle",
+                "image",
+            )
+        }),
+        ("الرابط", {
+            "fields": (
+                "link_label",
+                "link_url",
+            )
+        }),
+        ("إعدادات الظهور", {
+            "fields": (
+                "order",
+                "is_active",
+            )
+        }),
+        ("معلومات النظام", {
+            "fields": ("created_at", "updated_at"),
+            "classes": ("collapse",),
         }),
     )
