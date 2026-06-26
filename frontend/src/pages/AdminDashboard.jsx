@@ -41,6 +41,7 @@ import {
   adminFetchPaymentSettings,
   adminFetchProducts,
   adminFetchSettings,
+  adminLogin,
   adminUpdateCategory,
   adminUpdateHeroSlide,
   adminUpdateOfferBanner,
@@ -389,7 +390,7 @@ function StatusBadge({ children, variant = "neutral" }) {
 
 function AdminDashboard({ onBackToApp }) {
   const [adminToken, setAdminToken] = useState(() => getStoredAdminToken());
-  const [tokenDraft, setTokenDraft] = useState(() => getStoredAdminToken());
+  const [loginForm, setLoginForm] = useState({ username: "", password: "" });
   const [activeTab, setActiveTab] = useState("home");
   const [formPanel, setFormPanel] = useState(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -531,22 +532,43 @@ function AdminDashboard({ onBackToApp }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [adminToken]);
 
-  const handleTokenSubmit = (event) => {
+  const handleTokenSubmit = async (event) => {
     event.preventDefault();
-    const cleanToken = tokenDraft.trim();
-    if (!cleanToken) {
-      setError("أدخل توكن الإدارة أولاً.");
+
+    const username = loginForm.username.trim();
+    const password = loginForm.password;
+
+    if (!username || !password) {
+      setError("أدخل اسم المستخدم وكلمة المرور.");
       return;
     }
-    saveStoredAdminToken(cleanToken);
-    setAdminToken(cleanToken);
-    setNotice("تم حفظ التوكن محلياً.");
+
+    setSaving(true);
+    setError("");
+
+    try {
+      const data = await adminLogin({ username, password });
+      const cleanToken = data?.token || "";
+
+      if (!cleanToken) {
+        throw new Error("لم يرجع السيرفر توكن صالح.");
+      }
+
+      saveStoredAdminToken(cleanToken);
+      setAdminToken(cleanToken);
+      setLoginForm({ username: "", password: "" });
+      setNotice("تم تسجيل الدخول بنجاح.");
+    } catch (err) {
+      setError(err.message || "تعذر تسجيل الدخول.");
+    } finally {
+      setSaving(false);
+    }
   };
 
   const logout = () => {
     clearStoredAdminToken();
     setAdminToken("");
-    setTokenDraft("");
+    setLoginForm({ username: "", password: "" });
     setProducts([]);
     setCategories([]);
     setSettings(null);
@@ -1058,18 +1080,32 @@ function AdminDashboard({ onBackToApp }) {
 
           <form className="admin-login-form" onSubmit={handleTokenSubmit}>
             <h2>تسجيل الدخول</h2>
-            <Field label="توكن الإدارة">
+
+            <Field label="اسم المستخدم">
               <input
-                value={tokenDraft}
-                onChange={(event) => setTokenDraft(event.target.value)}
-                placeholder="أدخل توكن الإدارة"
-                type="password"
+                value={loginForm.username}
+                onChange={(event) => setLoginForm({ ...loginForm, username: event.target.value })}
+                placeholder="أدخل اسم المستخدم"
+                type="text"
+                autoComplete="username"
               />
             </Field>
+
+            <Field label="كلمة المرور">
+              <input
+                value={loginForm.password}
+                onChange={(event) => setLoginForm({ ...loginForm, password: event.target.value })}
+                placeholder="أدخل كلمة المرور"
+                type="password"
+                autoComplete="current-password"
+              />
+            </Field>
+
             {error && <p className="admin-error">{error}</p>}
-            <button className="admin-submit" type="submit">
+
+            <button className="admin-submit" disabled={saving} type="submit">
               <Shield size={18} />
-              دخول إلى لوحة الإدارة
+              {saving ? "جاري الدخول..." : "دخول إلى لوحة الإدارة"}
             </button>
           </form>
 

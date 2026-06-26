@@ -170,6 +170,19 @@ export async function fetchProduct(productId, options = {}) {
   return mapApiProductToUiProduct(data);
 }
 
+export async function adminLogin(payload, options = {}) {
+  const response = await fetch(`${API_BASE_URL}/admin/login/`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload || {}),
+    signal: options.signal,
+  });
+
+  return parseResponse(response, "/admin/login/");
+}
+
 export async function adminFetchSettings(options = {}) {
   return adminRequest("/admin/settings/", options);
 }
