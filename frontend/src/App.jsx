@@ -1851,7 +1851,7 @@ ${STORE_SHIPPING_TEXT}${
     return renderHomePage();
   };
 
-if (currentPath.startsWith("/admin")) {
+if (currentPath.startsWith("/admin") || currentPath.startsWith("/dashboard")) {
   return (
     <AdminDashboard
       onBackToApp={() => {
