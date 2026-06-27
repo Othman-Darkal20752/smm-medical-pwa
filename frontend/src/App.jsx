@@ -26,6 +26,7 @@ import { useAutoHorizontalScroll } from "./hooks/useAutoHorizontalScroll";
 
 import AppHeader from "./components/AppHeader";
 import HomeHero from "./components/HomeHero";
+import StaticHero from "./components/StaticHero";
 import CategoryStrip from "./components/CategoryStrip";
 import ProductCard from "./components/ProductCard";
 import BottomNav from "./components/BottomNav";
@@ -1252,6 +1253,7 @@ ${STORE_SHIPPING_TEXT}${
 
   const renderHomePage = () => (
     <>
+      <StaticHero />
       <HomeHero onBrowseProducts={() => handlePageChange("products")} />
 
       <CategoryStrip

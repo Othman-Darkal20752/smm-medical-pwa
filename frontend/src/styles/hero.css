@@ -118,3 +118,39 @@
   }
 }
 
+/* Stage 6B: fixed static hero above the animated hero slider */
+.static-hero-banner {
+  position: relative;
+  overflow: hidden;
+  min-height: clamp(220px, 30vw, 420px);
+  margin: 18px 0 16px;
+  border-radius: 34px;
+  background: #071a33;
+  box-shadow: 0 22px 55px rgba(7, 26, 51, 0.18);
+}
+
+.static-hero-image {
+  position: absolute;
+  inset: 0;
+  background-image: var(--static-hero-desktop);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+@media (max-width: 899px) {
+  .static-hero-banner {
+    min-height: 312px;
+    margin: 12px 12px 14px;
+    border-radius: 28px;
+  }
+
+  .static-hero-image {
+    background-image: var(--static-hero-mobile);
+  }
+
+  .static-hero-banner + .hero-image-carousel {
+    margin-top: 0;
+  }
+}
+
