@@ -1,9 +1,12 @@
-﻿const CACHE_NAME = "smm-pwa-v5";
+const CACHE_NAME = "smm-pwa-v8";
 
 const STATIC_ASSETS = [
   "/",
   "/manifest.webmanifest",
-  "/icons/logo.png"
+  "/icons/icon-192.png",
+  "/icons/icon-512.png",
+  "/icons/apple-touch-icon.png",
+  "/icons/favicon-32.png"
 ];
 
 self.addEventListener("install", (event) => {

@@ -1,20 +1,33 @@
-/* Stage 2: real hero image carousel */
+/* Stage 6A: backend-aware hero carousel with local fallback images */
 .hero-image-carousel {
-  min-height: 560px;
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  min-height: clamp(430px, 46vw, 620px);
+  margin: 18px 0 30px;
   background: #071a33;
 }
 
 .hero-image-carousel .hero-slide-bg {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
   background-image: var(--hero-desktop-image);
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
+  transform: scale(1.01);
   transition: background-image 320ms ease;
 }
 
 .hero-image-carousel::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
   background:
-    linear-gradient(90deg, rgba(7, 26, 51, 0.08), rgba(7, 26, 51, 0.84)),
+    linear-gradient(90deg, rgba(7, 26, 51, 0.06), rgba(7, 26, 51, 0.86)),
     radial-gradient(circle at 86% 18%, rgba(255, 255, 255, 0.12), transparent 28%);
 }
 
@@ -26,26 +39,25 @@
 }
 
 .hero-image-carousel .hero-brand-panel {
-  background: rgba(7, 26, 51, 0.48);
+  background: rgba(7, 26, 51, 0.52);
   border-color: rgba(255, 255, 255, 0.16);
+  backdrop-filter: blur(14px);
 }
 
-.hero-image-carousel .hero-logo-watermark {
+.hero-image-carousel .hero-logo-watermark,
+.hero-image-carousel .hero-metrics,
+.hero-image-carousel .hero-actions {
   display: none;
 }
 
-.hero-image-carousel .hero-actions button:hover,
-.hero-image-carousel .hero-actions a:hover {
-  transform: translateY(-2px);
-}
-
 .hero-image-carousel .hero-dots button {
-  transition: width 180ms ease, background 180ms ease;
+  transition: width 180ms ease, background 180ms ease, opacity 180ms ease;
 }
 
 @media (max-width: 899px) {
   .hero-image-carousel {
-    min-height: 560px;
+    min-height: 430px;
+    margin: 12px 12px 24px;
     border-radius: 28px;
   }
 
@@ -56,20 +68,37 @@
 
   .hero-image-carousel::after {
     background:
-      linear-gradient(180deg, rgba(7, 26, 51, 0.2), rgba(7, 26, 51, 0.88)),
+      linear-gradient(180deg, rgba(7, 26, 51, 0.04), rgba(7, 26, 51, 0.88)),
       radial-gradient(circle at 50% 16%, rgba(255, 255, 255, 0.1), transparent 30%);
   }
 
   .hero-image-content {
+    display: flex;
+    min-height: 430px;
+    flex-direction: column;
+    justify-content: flex-end;
     margin-inline-start: 0;
-    padding-top: 30px;
+    padding: 28px 20px 54px;
+  }
+
+  .hero-image-carousel .hero-brand-panel {
+    width: fit-content;
+    max-width: 100%;
+    margin-bottom: 12px;
   }
 
   .hero-image-carousel h1 {
     max-width: 330px;
+    font-size: clamp(1.65rem, 8vw, 2.35rem);
+    line-height: 1.25;
   }
 
   .hero-image-carousel p {
     max-width: 330px;
+    font-size: 0.95rem;
+  }
+
+  .hero-image-carousel .hero-dots {
+    bottom: 18px;
   }
 }
