@@ -143,13 +143,6 @@ function HomeHero() {
 
       {shouldShowCopy && (
         <div className="hero-carousel-content hero-image-content">
-          <div className="hero-brand-panel">
-            <img src={storeInfo.logo} alt={storeInfo.name} />
-            <div>
-              <strong>{storeInfo.shortName}</strong>
-              <span>{storeInfo.englishName}</span>
-            </div>
-          </div>
 
           {slide.eyebrow && <span className="hero-eyebrow">{slide.eyebrow}</span>}
           {slide.title && <h1>{slide.title}</h1>}
