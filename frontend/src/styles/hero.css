@@ -102,3 +102,19 @@
     bottom: 18px;
   }
 }
+
+/* Dashboard-uploaded hero images are already designed, so show them cleanly. */
+.hero-image-carousel.hero-dashboard-image::after {
+  background: none;
+}
+
+.hero-image-carousel.hero-dashboard-image .hero-slide-bg {
+  transform: none;
+}
+
+@media (max-width: 899px) {
+  .hero-image-carousel.hero-dashboard-image {
+    min-height: 312px;
+  }
+}
+
