@@ -1260,3 +1260,34 @@
   }
 }
 
+/* Stage 6J: menu touch animation */
+@media (max-width: 899px) {
+  .mobile-g4-menu-button,
+  .mobile-g4-theme-button,
+  .mobile-g4-cart-button {
+    transition:
+      transform 150ms ease,
+      background 150ms ease,
+      box-shadow 150ms ease;
+  }
+
+  .mobile-g4-menu-button:active,
+  .mobile-g4-theme-button:active,
+  .mobile-g4-cart-button:active {
+    transform: scale(0.92);
+  }
+
+  .mobile-g4-menu-button:active {
+    box-shadow: 0 0 0 5px rgba(217, 4, 22, 0.08) !important;
+  }
+
+  :root[data-theme="dark"] .mobile-g4-menu-button:active {
+    background: rgba(255, 255, 255, 0.14) !important;
+  }
+
+  :root[data-theme="light"] .mobile-g4-menu-button:active,
+  :root:not([data-theme]) .mobile-g4-menu-button:active {
+    background: #eef6fb !important;
+  }
+}
+

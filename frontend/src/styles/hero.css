@@ -316,3 +316,40 @@
   }
 }
 
+/* Stage 6J: compact mobile hero sizing */
+@media (max-width: 899px) {
+  .static-hero-banner.static-promo-strip {
+    min-height: 66px !important;
+    margin: 8px 12px 8px !important;
+    padding: 8px 10px !important;
+    border-radius: 20px !important;
+  }
+
+  .hero-image-carousel {
+    margin: 0 12px 12px !important;
+    border-radius: 22px !important;
+  }
+
+  .hero-image-carousel.hero-dashboard-image,
+  .hero-image-carousel.hero-fallback-image {
+    min-height: 224px !important;
+  }
+
+  .hero-image-content {
+    min-height: 224px !important;
+    padding: 22px 18px 44px !important;
+  }
+
+  .hero-image-carousel h1 {
+    font-size: clamp(1.35rem, 7vw, 2rem) !important;
+  }
+
+  .hero-image-carousel p {
+    font-size: 0.82rem !important;
+  }
+
+  .hero-image-carousel .hero-dots {
+    bottom: 13px !important;
+  }
+}
+
