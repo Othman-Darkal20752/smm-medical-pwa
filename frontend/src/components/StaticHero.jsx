@@ -1,78 +1,72 @@
 import { useEffect, useState } from "react";
 import { fetchSiteSettings } from "../services/api";
 
-const FALLBACK_STATIC_HERO = {
-  desktopImage: "/hero/hero-1-desktop.webp?v=9",
-  mobileImage: "/hero/hero-1-mobile.webp?v=9",
+const DEFAULT_PROMO = {
+  title: "\u0634\u062d\u0646 \u0644\u0643\u0627\u0641\u0629 \u0627\u0644\u0645\u062d\u0627\u0641\u0638\u0627\u062a \u0627\u0644\u0633\u0648\u0631\u064a\u0629",
+  subtitle: "\u062a\u0648\u0635\u064a\u0644 \u0633\u0631\u064a\u0639 \u0648\u0622\u0645\u0646 \u062d\u062a\u0649 \u0628\u0627\u0628 \u0645\u0646\u0632\u0644\u0643",
 };
 
-function extractStaticHero(payload) {
+function extractPromo(payload) {
   const store = payload?.store || payload || {};
 
-  const desktopImage =
-    store.static_hero_desktop_url ||
-    store.static_hero_desktop ||
-    store.staticHeroDesktop ||
-    store.static_hero_mobile_url ||
-    store.static_hero_mobile ||
-    "";
-
-  const mobileImage =
-    store.static_hero_mobile_url ||
-    store.static_hero_mobile ||
-    store.staticHeroMobile ||
-    desktopImage;
-
-  if (!desktopImage && !mobileImage) {
-    return FALLBACK_STATIC_HERO;
-  }
-
   return {
-    desktopImage: desktopImage || mobileImage,
-    mobileImage: mobileImage || desktopImage,
+    title: store.shipping_note || DEFAULT_PROMO.title,
+    subtitle:
+      store.address ||
+      store.location ||
+      DEFAULT_PROMO.subtitle,
   };
 }
 
 function StaticHero() {
-  const [hero, setHero] = useState(FALLBACK_STATIC_HERO);
+  const [promo, setPromo] = useState(DEFAULT_PROMO);
 
   useEffect(() => {
     const controller = new AbortController();
 
-    async function loadStaticHero() {
+    async function loadPromo() {
       try {
         const data = await fetchSiteSettings({ signal: controller.signal });
-        const nextHero = extractStaticHero(data);
+        const nextPromo = extractPromo(data);
 
         if (!controller.signal.aborted) {
-          setHero(nextHero);
+          setPromo(nextPromo);
         }
       } catch (error) {
         if (error.name !== "AbortError") {
-          console.warn("Static hero settings unavailable, using local fallback image.", error);
+          console.warn("Static promo settings unavailable, using default promo.", error);
         }
       }
     }
 
-    loadStaticHero();
+    loadPromo();
 
     return () => controller.abort();
   }, []);
 
-  if (!hero?.desktopImage && !hero?.mobileImage) {
-    return null;
-  }
-
   return (
-    <section className="static-hero-banner" aria-label="?????? ???????? ???????">
-      <div
-        className="static-hero-image"
-        aria-hidden="true"
-        style={{
-          "--static-hero-desktop": `url("${hero.desktopImage}")`,
-          "--static-hero-mobile": `url("${hero.mobileImage}")`,
-        }}
-      />
+    <section className="static-hero-banner static-promo-strip" aria-label="\u0628\u0627\u0646\u0631 \u062b\u0627\u0628\u062a">
+      <div className="static-promo-visual" aria-hidden="true">
+        <span className="static-promo-box">SMM</span>
+        <span className="static-promo-pin">?</span>
+      </div>
+
+      <div className="static-promo-copy">
+        <strong>{promo.title}</strong>
+        <span>{promo.subtitle}</span>
+      </div>
+
+      <span className="static-promo-divider" aria-hidden="true" />
+
+      <div className="static-promo-icon" aria-hidden="true">
+        <svg viewBox="0 0 48 48" role="img">
+          <path d="M7 14h22v19H7z" />
+          <path d="M29 20h7l5 6v7H29z" />
+          <circle cx="16" cy="35" r="4" />
+          <circle cx="35" cy="35" r="4" />
+          <path d="M12 20h11M12 25h9" />
+        </svg>
+      </div>
     </section>
   );
 }
