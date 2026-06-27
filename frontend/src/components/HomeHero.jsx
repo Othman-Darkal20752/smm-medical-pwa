@@ -71,7 +71,8 @@ function extractHeroSlides(payload) {
 }
 
 function HomeHero() {
-  const [slides, setSlides] = useState(FALLBACK_HERO_SLIDES);
+  const [slides, setSlides] = useState([]);
+  const [isHeroReady, setIsHeroReady] = useState(false);
   const [activeSlide, setActiveSlide] = useState(0);
 
   useEffect(() => {
@@ -84,11 +85,20 @@ function HomeHero() {
 
         if (apiSlides.length > 0) {
           setSlides(apiSlides);
-          setActiveSlide(0);
+        } else {
+          setSlides(FALLBACK_HERO_SLIDES);
         }
+
+        setActiveSlide(0);
       } catch (error) {
         if (error.name !== "AbortError") {
           console.warn("Hero slides API unavailable, using local fallback images.", error);
+          setSlides(FALLBACK_HERO_SLIDES);
+          setActiveSlide(0);
+        }
+      } finally {
+        if (!controller.signal.aborted) {
+          setIsHeroReady(true);
         }
       }
     }
@@ -110,7 +120,7 @@ function HomeHero() {
 
   const slide = slides[activeSlide] || slides[0];
 
-  if (!slide) {
+  if (!isHeroReady || !slide) {
     return null;
   }
 
