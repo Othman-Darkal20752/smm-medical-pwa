@@ -1,4 +1,4 @@
-/* Stage 5: SMM navbar inspired by G4 clarity, not copied */
+﻿/* Stage 5: SMM navbar inspired by G4 clarity, not copied */
 .smm-stage5-navbar {
   border-bottom: 1px solid rgba(13, 43, 86, 0.08);
   backdrop-filter: blur(16px);
@@ -417,404 +417,22 @@
   }
 }
 
-/* Mobile: keep header clean and hide desktop actions completely */
-@media (max-width: 899px) {
-  .smm-stage5-navbar .header-service-strip {
-    display: none !important;
-  }
-
-  .smm-stage5-navbar .header-actions,
-  .smm-stage5-navbar .desktop-nav,
-  .smm-stage5-navbar .theme-toggle-button {
-    display: none !important;
-  }
-
-  .smm-stage5-navbar .mobile-theme-toggle {
-    display: inline-grid !important;
-  }
-}
-
-/* Drawer readability fix */
-.drawer {
-  background: #ffffff !important;
-  color: #0d2b56 !important;
-}
-
-.drawer-head h2,
-.drawer a {
-  color: #0d2b56 !important;
-  opacity: 1 !important;
-}
-
-.drawer-head p {
-  color: #6d7d96 !important;
-  opacity: 1 !important;
-}
-
-.drawer a svg:first-child {
-  color: #d90416 !important;
-}
-
-.drawer a svg:last-child {
-  color: #b8c4d4 !important;
-}
-
-:root[data-theme="dark"] .drawer {
-  background: #102840 !important;
-  color: #edf6ff !important;
-}
-
-:root[data-theme="dark"] .drawer-head {
-  border-bottom-color: rgba(255, 255, 255, 0.12) !important;
-}
-
-:root[data-theme="dark"] .drawer-head h2,
-:root[data-theme="dark"] .drawer a {
-  color: #edf6ff !important;
-  opacity: 1 !important;
-}
-
-:root[data-theme="dark"] .drawer-head p {
-  color: #b9cde7 !important;
-  opacity: 1 !important;
-}
-
-:root[data-theme="dark"] .drawer a {
-  border-bottom-color: rgba(255, 255, 255, 0.1) !important;
-}
-
-:root[data-theme="dark"] .drawer a svg:first-child {
-  color: #ff4056 !important;
-}
-
-:root[data-theme="dark"] .drawer a svg:last-child {
-  color: #7f94b2 !important;
-}
-
-/* Stage 6D: G4-like compact mobile navbar + option 1 hero polish */
-.mobile-g4-categories {
-  display: none;
-}
-
-@media (max-width: 899px) {
-  .smm-g4-navbar {
-    width: calc(100% - 20px) !important;
-    margin: 8px auto 8px !important;
-    padding: 6px !important;
-    border-radius: 18px !important;
-    background: rgba(255, 255, 255, 0.96) !important;
-    border: 1px solid rgba(11, 47, 95, 0.08) !important;
-    box-shadow: 0 12px 30px rgba(7, 26, 51, 0.12) !important;
-    backdrop-filter: blur(14px);
-  }
-
-  :root[data-theme="dark"] .smm-g4-navbar {
-    background: rgba(255, 255, 255, 0.96) !important;
-    border-color: rgba(11, 47, 95, 0.08) !important;
-  }
-
-  .smm-g4-navbar .header-service-strip {
-    display: none !important;
-  }
-
-  .smm-g4-topbar {
-    display: flex !important;
-    align-items: center !important;
-    gap: 5px !important;
-    min-height: 42px !important;
-    padding: 0 !important;
-    background: transparent !important;
-    border: 0 !important;
-    box-shadow: none !important;
-    grid-template-columns: none !important;
-    grid-template-areas: none !important;
-  }
-
-  .smm-g4-brand {
-    order: 1 !important;
-    flex: 0 0 auto !important;
-    min-width: 66px !important;
-    max-width: 74px !important;
-    padding: 0 !important;
-    gap: 4px !important;
-    background: transparent !important;
-    border: 0 !important;
-    box-shadow: none !important;
-  }
-
-  .smm-g4-brand img {
-    width: 28px !important;
-    height: 28px !important;
-    max-width: 28px !important;
-    max-height: 28px !important;
-    border-radius: 9px !important;
-    object-fit: contain !important;
-  }
-
-  .smm-g4-brand span {
-    display: flex !important;
-    flex-direction: column !important;
-    line-height: 1.05 !important;
-    min-width: 0 !important;
-  }
-
-  .smm-g4-brand strong {
-    color: #0b2f5f !important;
-    font-size: 0.66rem !important;
-    font-weight: 900 !important;
-    letter-spacing: 0 !important;
-  }
-
-  .smm-g4-brand small {
-    display: block !important;
-    max-width: 42px !important;
-    color: rgba(11, 47, 95, 0.72) !important;
-    font-size: 0.48rem !important;
-    font-weight: 800 !important;
-    white-space: nowrap !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
-  }
-
-  .smm-g4-search {
-    order: 2 !important;
-    flex: 1 1 auto !important;
-    min-width: 82px !important;
-    height: 34px !important;
-    padding: 0 9px !important;
-    gap: 5px !important;
-    border-radius: 999px !important;
-    background: #f7fbfc !important;
-    border: 1px solid rgba(11, 47, 95, 0.12) !important;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9) !important;
-  }
-
-  .smm-g4-search svg {
-    width: 15px !important;
-    height: 15px !important;
-    color: #0b2f5f !important;
-    opacity: 0.74 !important;
-  }
-
-  .smm-g4-search input {
-    color: #0b2f5f !important;
-    font-size: 0.68rem !important;
-    font-weight: 700 !important;
-    text-align: right !important;
-  }
-
-  .smm-g4-search input::placeholder {
-    color: rgba(11, 47, 95, 0.48) !important;
-  }
-
-  .mobile-g4-categories {
-    order: 3 !important;
-    flex: 0 0 auto !important;
-    height: 34px !important;
-    padding: 0 9px !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    gap: 4px !important;
-    border-radius: 999px !important;
-    border: 1px solid rgba(11, 47, 95, 0.12) !important;
-    background: #f4fbfb !important;
-    color: #0b2f5f !important;
-    font-size: 0.64rem !important;
-    font-weight: 900 !important;
-    white-space: nowrap !important;
-  }
-
-  .smm-g4-actions {
-    display: contents !important;
-  }
-
-  .smm-g4-actions .desktop-whatsapp-button,
-  .smm-g4-actions .smm-g4-desktop-theme,
-  .smm-g4-desktop-nav {
-    display: none !important;
-  }
-
-  .smm-g4-cart {
-    order: 4 !important;
-    flex: 0 0 36px !important;
-    width: 36px !important;
-    height: 36px !important;
-    padding: 0 !important;
-    border-radius: 50% !important;
-    background: #0b6f75 !important;
-    border: 0 !important;
-    color: #ffffff !important;
-    box-shadow: 0 8px 18px rgba(11, 111, 117, 0.24) !important;
-  }
-
-  .smm-g4-cart span {
-    display: none !important;
-  }
-
-  .smm-g4-cart b {
-    top: -5px !important;
-    right: -5px !important;
-    min-width: 17px !important;
-    height: 17px !important;
-    padding: 0 4px !important;
-    font-size: 0.62rem !important;
-    background: #d90416 !important;
-    color: white !important;
-  }
-
-  .smm-g4-theme {
-    display: none !important;
-  }
-
-  .smm-g4-menu {
-    order: 5 !important;
-    flex: 0 0 36px !important;
-    width: 36px !important;
-    height: 36px !important;
-    display: inline-flex !important;
-    border-radius: 50% !important;
-    background: #ffffff !important;
-    border: 1px solid rgba(11, 47, 95, 0.12) !important;
-    color: #0b2f5f !important;
-    box-shadow: 0 8px 16px rgba(7, 26, 51, 0.08) !important;
-  }
-
-  .static-hero-banner.static-promo-strip {
-    margin: 10px 12px 10px !important;
-    padding: 10px 12px !important;
-    min-height: 74px !important;
-    grid-template-columns: 62px 1fr 1px 38px !important;
-    gap: 9px !important;
-    border-radius: 22px !important;
-  }
-
-  .static-promo-visual {
-    width: 62px !important;
-    height: 46px !important;
-  }
-
-  .static-promo-box {
-    width: 48px !important;
-    height: 32px !important;
-    font-size: 0.64rem !important;
-  }
-
-  .static-promo-pin {
-    width: 24px !important;
-    height: 24px !important;
-    font-size: 0 !important;
-  }
-
-  .static-promo-pin::before {
-    content: "";
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    background: white;
-    display: block;
-  }
-
-  .static-promo-copy strong {
-    font-size: 0.8rem !important;
-  }
-
-  .static-promo-copy span {
-    font-size: 0.68rem !important;
-  }
-
-  .static-promo-icon {
-    width: 36px !important;
-    height: 36px !important;
-    border-radius: 13px !important;
-  }
-
-  .static-promo-icon svg {
-    width: 24px !important;
-    height: 24px !important;
-  }
-
-  .hero-image-carousel {
-    margin: 0 12px 16px !important;
-    border-radius: 24px !important;
-  }
-
-  .hero-image-carousel.hero-dashboard-image {
-    min-height: 246px !important;
-  }
-
-  .hero-image-carousel.hero-dashboard-image .hero-slide-bg {
-    background-size: cover !important;
-    background-position: center !important;
-  }
-
-  .drawer {
-    width: min(82vw, 330px) !important;
-    max-width: 330px !important;
-    overflow: hidden !important;
-  }
-
-  .drawer-head {
-    display: grid !important;
-    grid-template-columns: 72px 1fr auto !important;
-    align-items: center !important;
-    gap: 12px !important;
-  }
-
-  .drawer-logo,
-  .drawer-head .drawer-logo,
-  .drawer-head img.drawer-logo {
-    width: 72px !important;
-    height: 72px !important;
-    max-width: 72px !important;
-    max-height: 72px !important;
-    min-width: 72px !important;
-    object-fit: contain !important;
-    border-radius: 22px !important;
-  }
-
-  .drawer-head button {
-    position: static !important;
-    width: 40px !important;
-    height: 40px !important;
-    min-width: 40px !important;
-    border-radius: 50% !important;
-  }
-}
-
-@media (max-width: 370px) {
-  .mobile-g4-categories span {
-    display: none !important;
-  }
-
-  .mobile-g4-categories {
-    width: 34px !important;
-    padding: 0 !important;
-  }
-
-  .smm-g4-brand small {
-    display: none !important;
-  }
-
-  .smm-g4-brand {
-    min-width: 48px !important;
-    max-width: 54px !important;
-  }
-}
-
-/* Stage 6E: final isolated G4-like mobile navbar */
+/* Mobile reference header + real shipping image */
 .mobile-g4-shell {
   display: none;
 }
 
 @media (max-width: 899px) {
-  .smm-g4-navbar {
-    width: 100% !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    border: 0 !important;
-    border-radius: 0 !important;
-    background: transparent !important;
+  .site-header.smm-g4-navbar {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    width: 100%;
+    margin: 0;
+    padding: 18px 0 14px;
+    border: 0;
+    border-radius: 0;
+    background: #071a33 !important;
     box-shadow: none !important;
   }
 
@@ -824,470 +442,224 @@
   }
 
   .mobile-g4-shell {
-    direction: rtl;
-    width: calc(100% - 18px);
-    min-height: 48px;
-    margin: 8px auto 10px;
-    padding: 6px;
-    display: flex;
+    direction: ltr;
+    width: min(calc(100% - 28px), 430px);
+    margin: 0 auto;
+    padding: 0;
+    display: grid;
+    grid-template-columns: 58px minmax(0, 1fr) 58px;
+    grid-template-areas:
+      "theme brand menu"
+      "search search search";
     align-items: center;
-    gap: 6px;
-    border-radius: 17px;
-    background: rgba(255, 255, 255, 0.98);
-    border: 1px solid rgba(11, 47, 95, 0.08);
-    box-shadow: 0 10px 26px rgba(7, 26, 51, 0.13);
-    backdrop-filter: blur(14px);
+    gap: 14px;
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    overflow: visible !important;
+  }
+
+  .mobile-g4-cart-button {
+    display: none !important;
   }
 
   .mobile-g4-shell button {
     border: 0;
     font-family: inherit;
+    cursor: pointer;
   }
 
   .mobile-g4-brand {
-    flex: 0 0 74px;
-    max-width: 74px;
-    height: 36px;
+    grid-area: brand;
+    direction: ltr;
+    width: 100%;
+    height: 62px;
+    max-width: none;
+    min-width: 0;
     display: inline-flex;
     align-items: center;
-    justify-content: flex-start;
-    gap: 4px;
-    background: transparent;
-    color: #0b2f5f;
+    justify-content: center;
+    gap: 12px;
     padding: 0;
-  }
-
-  .mobile-g4-brand img {
-    width: 28px;
-    height: 28px;
-    border-radius: 9px;
-    object-fit: contain;
+    background: transparent !important;
+    color: #ffffff;
+    box-shadow: none !important;
   }
 
   .mobile-g4-brand span {
+    order: 1;
     min-width: 0;
     display: flex;
     flex-direction: column;
+    align-items: flex-end;
     line-height: 1.05;
     text-align: right;
   }
 
+  .mobile-g4-brand img {
+    order: 2;
+    width: 56px;
+    height: 56px;
+    border-radius: 18px;
+    object-fit: contain;
+    padding: 4px;
+    background: #ffffff;
+    box-shadow: 0 10px 22px rgba(0, 0, 0, 0.22);
+  }
+
   .mobile-g4-brand strong {
-    color: #0b2f5f;
-    font-size: 0.66rem;
-    font-weight: 900;
+    color: #ffffff !important;
+    font-size: 1.55rem;
+    font-weight: 950;
+    letter-spacing: 0.03em;
   }
 
   .mobile-g4-brand small {
-    max-width: 42px;
-    color: rgba(11, 47, 95, 0.66);
-    font-size: 0.48rem;
-    font-weight: 800;
+    max-width: 140px;
+    color: rgba(255, 255, 255, 0.84) !important;
+    font-size: 0.78rem;
+    font-weight: 900;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
   }
 
+  .mobile-g4-theme-button,
+  .mobile-g4-menu-button {
+    position: relative;
+    width: 58px;
+    height: 58px;
+    min-width: 58px;
+    display: inline-grid;
+    place-items: center;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1) !important;
+    color: #ffffff !important;
+    border: 1px solid rgba(255, 255, 255, 0.16) !important;
+    box-shadow: inset 0 0 20px rgba(255, 255, 255, 0.04);
+    transition: transform 150ms ease, background 150ms ease;
+  }
+
+  .mobile-g4-theme-button {
+    grid-area: theme;
+  }
+
+  .mobile-g4-menu-button {
+    grid-area: menu;
+  }
+
+  .mobile-g4-theme-button svg,
+  .mobile-g4-menu-button svg {
+    width: 28px;
+    height: 28px;
+  }
+
   .mobile-g4-search {
-    flex: 1 1 auto;
-    min-width: 78px;
-    height: 34px;
-    padding: 0 9px;
+    grid-area: search;
+    direction: rtl;
+    width: 100%;
+    min-width: 0;
+    height: 62px;
+    padding: 0 22px;
     display: flex;
     align-items: center;
-    gap: 5px;
-    border-radius: 999px;
-    background: #f7fbfc;
-    border: 1px solid rgba(11, 47, 95, 0.12);
+    gap: 14px;
+    border-radius: 30px;
+    background: rgba(255, 255, 255, 0.08) !important;
+    border: 1px solid rgba(255, 255, 255, 0.13) !important;
+    box-shadow:
+      inset 0 0 0 1px rgba(255, 255, 255, 0.035),
+      0 12px 24px rgba(0, 0, 0, 0.12);
   }
 
   .mobile-g4-search svg {
+    order: 2;
     flex: 0 0 auto;
-    color: #0b2f5f;
-    opacity: 0.72;
+    width: 27px;
+    height: 27px;
+    color: #ffffff !important;
+    opacity: 0.92;
   }
 
   .mobile-g4-search input {
+    order: 1;
     width: 100%;
     min-width: 0;
     border: 0;
     outline: 0;
     background: transparent;
-    color: #0b2f5f;
-    font-size: 0.68rem;
-    font-weight: 700;
+    color: #ffffff !important;
+    font-size: 1.04rem;
+    font-weight: 900;
     text-align: right;
   }
 
   .mobile-g4-search input::placeholder {
-    color: rgba(11, 47, 95, 0.46);
+    color: rgba(255, 255, 255, 0.56) !important;
   }
 
-  .mobile-g4-category-button {
-    flex: 0 0 auto;
-    height: 34px;
-    padding: 0 9px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 4px;
-    border-radius: 999px;
-    background: #f4fbfb;
-    color: #0b2f5f;
-    border: 1px solid rgba(11, 47, 95, 0.12) !important;
-    font-size: 0.62rem;
-    font-weight: 900;
-    white-space: nowrap;
+  .mobile-g4-theme-button:active,
+  .mobile-g4-menu-button:active {
+    transform: scale(0.94);
   }
 
-  .mobile-g4-cart-button,
-  .mobile-g4-menu-button {
-    position: relative;
-    flex: 0 0 36px;
-    width: 36px;
-    height: 36px;
-    display: inline-grid;
-    place-items: center;
-    border-radius: 50%;
-  }
-
-  .mobile-g4-cart-button {
-    background: #0b6f75;
-    color: #ffffff;
-    box-shadow: 0 8px 18px rgba(11, 111, 117, 0.25);
-  }
-
-  .mobile-g4-cart-button b {
-    position: absolute;
-    top: -5px;
-    right: -5px;
-    min-width: 17px;
-    height: 17px;
-    padding: 0 4px;
-    display: grid;
-    place-items: center;
-    border-radius: 999px;
-    background: #d90416;
-    color: #fff;
-    font-size: 0.62rem;
-    line-height: 1;
-  }
-
-  .mobile-g4-menu-button {
-    background: #ffffff;
-    color: #0b2f5f;
-    border: 1px solid rgba(11, 47, 95, 0.12) !important;
-    box-shadow: 0 8px 16px rgba(7, 26, 51, 0.08);
-  }
-
-  .static-hero-banner.static-promo-strip {
-    margin-top: 6px !important;
-  }
-
-  .drawer {
-    width: min(82vw, 330px) !important;
-    max-width: 330px !important;
+  .shipping-image-strip.static-hero-banner.static-promo-strip {
+    width: min(calc(100% - 22px), 430px) !important;
+    min-height: 0 !important;
+    margin: 12px auto 18px !important;
+    padding: 0 !important;
+    display: block !important;
+    border: 0 !important;
+    border-radius: 28px !important;
+    background: transparent !important;
+    box-shadow: none !important;
     overflow: hidden !important;
   }
 
-  .drawer-head {
-    display: grid !important;
-    grid-template-columns: 72px 1fr auto !important;
-    align-items: center !important;
-    gap: 12px !important;
-  }
-
-  .drawer-head img.drawer-logo {
-    width: 72px !important;
-    height: 72px !important;
-    max-width: 72px !important;
-    max-height: 72px !important;
-    min-width: 72px !important;
-    object-fit: contain !important;
-    border-radius: 22px !important;
-  }
-
-  .drawer-head button {
-    position: static !important;
-    width: 40px !important;
-    height: 40px !important;
-    min-width: 40px !important;
-    border-radius: 50% !important;
+  .shipping-image-strip .shipping-promo-image {
+    display: block !important;
+    width: 100% !important;
+    height: 74px !important;
+    object-fit: cover !important;
+    object-position: center !important;
+    border-radius: 28px !important;
   }
 }
 
 @media (max-width: 380px) {
-  .mobile-g4-brand {
-    flex-basis: 58px;
-    max-width: 58px;
+  .mobile-g4-shell {
+    width: min(calc(100% - 20px), 430px);
+    grid-template-columns: 52px minmax(0, 1fr) 52px;
+    gap: 12px;
+  }
+
+  .mobile-g4-theme-button,
+  .mobile-g4-menu-button {
+    width: 52px;
+    height: 52px;
+    min-width: 52px;
+  }
+
+  .mobile-g4-brand img {
+    width: 50px;
+    height: 50px;
+  }
+
+  .mobile-g4-brand strong {
+    font-size: 1.32rem;
   }
 
   .mobile-g4-brand small {
-    display: none;
-  }
-
-  .mobile-g4-category-button span {
-    display: none;
-  }
-
-  .mobile-g4-category-button {
-    width: 34px;
-    padding: 0;
-  }
-}
-
-/* Stage 6F: navbar final touches */
-@media (max-width: 899px) {
-  .mobile-g4-category-button {
-    display: none !important;
-  }
-
-  .mobile-g4-theme-button,
-  .mobile-g4-cart-button,
-  .mobile-g4-menu-button {
-    position: relative;
-    flex: 0 0 36px;
-    width: 36px;
-    height: 36px;
-    display: inline-grid;
-    place-items: center;
-    border-radius: 50%;
-  }
-
-  .mobile-g4-theme-button {
-    background: #ffffff;
-    color: #0b2f5f;
-    border: 1px solid rgba(11, 47, 95, 0.12) !important;
-    box-shadow: 0 8px 16px rgba(7, 26, 51, 0.08);
-  }
-
-  .mobile-g4-shell {
-    gap: 6px !important;
+    font-size: 0.68rem;
   }
 
   .mobile-g4-search {
-    min-width: 112px !important;
+    height: 58px;
   }
 
-  .hero-image-carousel .hero-brand-panel {
-    display: none !important;
+  .shipping-image-strip .shipping-promo-image {
+    height: 68px !important;
   }
 }
 
-@media (max-width: 380px) {
-  .mobile-g4-brand {
-    flex-basis: 58px !important;
-    max-width: 58px !important;
-  }
-
-  .mobile-g4-search {
-    min-width: 92px !important;
-  }
-}
-
-/* Stage 6G: make G4-like mobile navbar follow light/dark theme */
-@media (max-width: 899px) {
-  :root[data-theme="light"] .mobile-g4-shell,
-  :root:not([data-theme]) .mobile-g4-shell {
-    background: rgba(255, 255, 255, 0.98) !important;
-    border-color: rgba(11, 47, 95, 0.08) !important;
-    box-shadow: 0 10px 26px rgba(7, 26, 51, 0.13) !important;
-  }
-
-  :root[data-theme="light"] .mobile-g4-search,
-  :root:not([data-theme]) .mobile-g4-search {
-    background: #f7fbfc !important;
-    border-color: rgba(11, 47, 95, 0.12) !important;
-  }
-
-  :root[data-theme="light"] .mobile-g4-brand strong,
-  :root[data-theme="light"] .mobile-g4-brand small,
-  :root[data-theme="light"] .mobile-g4-search input,
-  :root[data-theme="light"] .mobile-g4-search svg,
-  :root:not([data-theme]) .mobile-g4-brand strong,
-  :root:not([data-theme]) .mobile-g4-brand small,
-  :root:not([data-theme]) .mobile-g4-search input,
-  :root:not([data-theme]) .mobile-g4-search svg {
-    color: #0b2f5f !important;
-  }
-
-  :root[data-theme="light"] .mobile-g4-menu-button,
-  :root[data-theme="light"] .mobile-g4-theme-button,
-  :root:not([data-theme]) .mobile-g4-menu-button,
-  :root:not([data-theme]) .mobile-g4-theme-button {
-    background: #ffffff !important;
-    color: #0b2f5f !important;
-    border-color: rgba(11, 47, 95, 0.12) !important;
-  }
-
-  :root[data-theme="dark"] .mobile-g4-shell {
-    background: rgba(7, 26, 51, 0.92) !important;
-    border-color: rgba(255, 255, 255, 0.12) !important;
-    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.22) !important;
-  }
-
-  :root[data-theme="dark"] .mobile-g4-search {
-    background: rgba(255, 255, 255, 0.08) !important;
-    border-color: rgba(255, 255, 255, 0.14) !important;
-  }
-
-  :root[data-theme="dark"] .mobile-g4-brand strong,
-  :root[data-theme="dark"] .mobile-g4-search input,
-  :root[data-theme="dark"] .mobile-g4-search svg {
-    color: #ffffff !important;
-  }
-
-  :root[data-theme="dark"] .mobile-g4-brand small {
-    color: rgba(255, 255, 255, 0.72) !important;
-  }
-
-  :root[data-theme="dark"] .mobile-g4-search input::placeholder {
-    color: rgba(255, 255, 255, 0.54) !important;
-  }
-
-  :root[data-theme="dark"] .mobile-g4-menu-button,
-  :root[data-theme="dark"] .mobile-g4-theme-button {
-    background: rgba(255, 255, 255, 0.08) !important;
-    color: #ffffff !important;
-    border-color: rgba(255, 255, 255, 0.14) !important;
-  }
-
-  :root[data-theme="dark"] .mobile-g4-cart-button {
-    background: #d90416 !important;
-    color: #ffffff !important;
-    box-shadow: 0 8px 18px rgba(217, 4, 22, 0.22) !important;
-  }
-}
-
-/* Stage 6H: remove white artifacts from mobile navbar */
-@media (max-width: 899px) {
-  .site-header.smm-g4-navbar,
-  .site-header.smm-g4-navbar::before,
-  .site-header.smm-g4-navbar::after {
-    background: transparent !important;
-    border: 0 !important;
-    box-shadow: none !important;
-  }
-
-  .mobile-g4-shell {
-    overflow: hidden !important;
-  }
-
-  :root[data-theme="dark"] .mobile-g4-shell {
-    background: linear-gradient(135deg, rgba(7, 26, 51, 0.98), rgba(10, 38, 69, 0.96)) !important;
-  }
-
-  :root[data-theme="dark"] .mobile-g4-brand,
-  :root[data-theme="dark"] .mobile-g4-search,
-  :root[data-theme="dark"] .mobile-g4-theme-button,
-  :root[data-theme="dark"] .mobile-g4-menu-button {
-    background: rgba(255, 255, 255, 0.07) !important;
-    border-color: rgba(255, 255, 255, 0.12) !important;
-    box-shadow: none !important;
-  }
-
-  :root[data-theme="dark"] .mobile-g4-brand {
-    background: transparent !important;
-    border: 0 !important;
-  }
-
-  :root[data-theme="dark"] .mobile-g4-brand img {
-    background: #ffffff !important;
-  }
-
-  :root[data-theme="dark"] .mobile-g4-search {
-    background: rgba(255, 255, 255, 0.08) !important;
-  }
-
-  :root[data-theme="dark"] .mobile-g4-theme-button,
-  :root[data-theme="dark"] .mobile-g4-menu-button {
-    color: #ffffff !important;
-  }
-
-  :root[data-theme="light"] .mobile-g4-shell {
-    background: #ffffff !important;
-  }
-
-  :root[data-theme="light"] .mobile-g4-brand {
-    background: transparent !important;
-    border: 0 !important;
-    box-shadow: none !important;
-  }
-
-  .mobile-g4-brand,
-  .mobile-g4-brand:hover,
-  .mobile-g4-brand:focus {
-    box-shadow: none !important;
-  }
-
-  .mobile-g4-shell > * {
-    max-height: 38px !important;
-  }
-}
-
-/* Stage 6I: fix outer navbar background strip */
-@media (max-width: 899px) {
-  :root[data-theme="dark"] .site-header.smm-g4-navbar {
-    background: #071a33 !important;
-    padding: 6px 0 4px !important;
-  }
-
-  :root[data-theme="light"] .site-header.smm-g4-navbar,
-  :root:not([data-theme]) .site-header.smm-g4-navbar {
-    background: #ffffff !important;
-    padding: 6px 0 4px !important;
-  }
-
-  .mobile-g4-shell {
-    margin-top: 0 !important;
-    margin-bottom: 0 !important;
-    width: calc(100% - 18px) !important;
-  }
-
-  :root[data-theme="dark"] .mobile-g4-shell {
-    background: #071a33 !important;
-    border-color: rgba(255, 255, 255, 0.12) !important;
-  }
-
-  :root[data-theme="dark"] .mobile-g4-search,
-  :root[data-theme="dark"] .mobile-g4-theme-button,
-  :root[data-theme="dark"] .mobile-g4-menu-button {
-    background: rgba(255, 255, 255, 0.08) !important;
-  }
-
-  :root[data-theme="dark"] .mobile-g4-cart-button {
-    background: #d90416 !important;
-  }
-}
-
-/* Stage 6J: menu touch animation */
-@media (max-width: 899px) {
-  .mobile-g4-menu-button,
-  .mobile-g4-theme-button,
-  .mobile-g4-cart-button {
-    transition:
-      transform 150ms ease,
-      background 150ms ease,
-      box-shadow 150ms ease;
-  }
-
-  .mobile-g4-menu-button:active,
-  .mobile-g4-theme-button:active,
-  .mobile-g4-cart-button:active {
-    transform: scale(0.92);
-  }
-
-  .mobile-g4-menu-button:active {
-    box-shadow: 0 0 0 5px rgba(217, 4, 22, 0.08) !important;
-  }
-
-  :root[data-theme="dark"] .mobile-g4-menu-button:active {
-    background: rgba(255, 255, 255, 0.14) !important;
-  }
-
-  :root[data-theme="light"] .mobile-g4-menu-button:active,
-  :root:not([data-theme]) .mobile-g4-menu-button:active {
-    background: #eef6fb !important;
-  }
-}
 
