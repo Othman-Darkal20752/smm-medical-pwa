@@ -1522,3 +1522,120 @@ a:active {
 }
 
 
+
+
+
+/* Clean mobile page heads and empty states */
+@media (max-width: 899px) {
+  .page-head {
+    width: min(calc(100% - 24px), 430px);
+    margin: 10px auto 14px;
+    padding: 16px 16px 18px;
+    border-radius: 0 0 22px 22px;
+    background: linear-gradient(180deg, #123b63, #0b2f50);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    box-shadow: 0 14px 30px rgba(7, 26, 51, 0.18);
+    text-align: right;
+  }
+
+  .page-head span {
+    display: block;
+    margin-bottom: 6px;
+    color: rgba(255, 255, 255, 0.78);
+    font-size: 11px;
+    font-weight: 850;
+    line-height: 1.5;
+  }
+
+  .page-head h1 {
+    margin: 0 0 8px;
+    color: #ffffff;
+    font-size: 28px;
+    font-weight: 950;
+    line-height: 1.25;
+    letter-spacing: -0.02em;
+  }
+
+  .page-head p {
+    max-width: 100%;
+    margin: 0;
+    color: rgba(255, 255, 255, 0.86);
+    font-size: 13px;
+    font-weight: 750;
+    line-height: 1.8;
+  }
+
+  .cart-empty-card,
+  .products-empty-card,
+  .products-loading-card {
+    width: min(calc(100% - 24px), 430px);
+    margin: 12px auto;
+    padding: 22px 16px;
+    display: grid;
+    justify-items: center;
+    gap: 10px;
+    border-radius: 22px;
+    background: linear-gradient(180deg, #123b63, #0b2f50);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    box-shadow: 0 14px 30px rgba(7, 26, 51, 0.16);
+    text-align: center;
+  }
+
+  .cart-empty-card svg,
+  .products-empty-card svg,
+  .products-loading-card svg {
+    width: 46px;
+    height: 46px;
+    color: rgba(255, 255, 255, 0.9);
+  }
+
+  .cart-empty-card h3,
+  .cart-empty-card strong,
+  .products-empty-card strong,
+  .products-loading-card strong {
+    margin: 0;
+    color: #ffffff;
+    font-size: 17px;
+    font-weight: 950;
+    line-height: 1.5;
+  }
+
+  .cart-empty-card p,
+  .cart-empty-card span,
+  .products-empty-card span,
+  .products-loading-card span {
+    margin: 0;
+    color: rgba(255, 255, 255, 0.82);
+    font-size: 13px;
+    font-weight: 750;
+    line-height: 1.7;
+  }
+
+  .cart-empty-card button,
+  .products-empty-card button {
+    min-height: 38px;
+    padding: 0 18px;
+    border: 0;
+    border-radius: 999px;
+    background: #ffffff;
+    color: var(--smm-primary);
+    font-size: 13px;
+    font-weight: 950;
+    cursor: pointer;
+  }
+
+  .products-api-note {
+    width: min(calc(100% - 24px), 430px);
+    margin: 10px auto 12px;
+    padding: 12px 14px;
+    border-radius: 16px;
+    background: rgba(217, 4, 22, 0.12);
+    border: 1px solid rgba(217, 4, 22, 0.22);
+    color: #ffdce1;
+    font-size: 12px;
+    font-weight: 850;
+    line-height: 1.7;
+    text-align: center;
+  }
+}
+
