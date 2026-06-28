@@ -1,4 +1,4 @@
-:root {
+﻿:root {
   --smm-red: #d90416;
   --smm-red-dark: #a8000d;
   --smm-navy: #071a33;
@@ -486,35 +486,40 @@ button {
 .drawer-layer {
   position: fixed;
   inset: 0;
-  z-index: 50;
+  z-index: 120;
+  direction: rtl;
 }
 
 .drawer-backdrop {
   position: absolute;
   inset: 0;
   border: 0;
-  background: rgba(0, 0, 0, 0.42);
+  background: rgba(7, 26, 51, 0.52);
 }
 
 .drawer {
   position: absolute;
   top: 0;
   right: 0;
-  width: min(84vw, 390px);
+  width: min(82vw, 340px);
   height: 100%;
-  background: #fff;
-  border-radius: 0 0 0 32px;
-  padding: 22px;
+  max-height: 100dvh;
+  overflow-y: auto;
+  padding: 18px 16px 22px;
+  background: #ffffff;
+  color: var(--text);
+  border-radius: 0 0 0 28px;
   box-shadow: -24px 0 50px rgba(0, 0, 0, 0.22);
 }
 
 .drawer-head {
-  display: flex;
+  display: grid;
+  grid-template-columns: 42px 56px minmax(0, 1fr);
   align-items: center;
-  gap: 12px;
-  padding-bottom: 20px;
+  gap: 10px;
+  padding-bottom: 16px;
+  margin-bottom: 10px;
   border-bottom: 1px solid var(--line);
-  margin-bottom: 16px;
 }
 
 .drawer-head button {
@@ -522,30 +527,51 @@ button {
   height: 42px;
   border: 0;
   border-radius: 999px;
+  display: grid;
+  place-items: center;
   background: var(--smm-red);
-  color: #fff;
+  color: #ffffff;
+}
+
+.drawer-logo {
+  width: 56px;
+  height: 56px;
+  max-width: 56px;
+  max-height: 56px;
+  object-fit: contain;
+  padding: 5px;
+  border-radius: 18px;
+  background: #ffffff;
+  box-shadow: 0 10px 22px rgba(7, 26, 51, 0.12);
 }
 
 .drawer-head h2 {
   margin: 0;
-  font-size: 18px;
   color: var(--smm-navy);
+  font-size: 18px;
+  font-weight: 950;
+  line-height: 1.25;
 }
 
 .drawer-head p {
   margin: 4px 0 0;
   color: var(--muted);
+  font-size: 12px;
+  font-weight: 750;
+  line-height: 1.5;
 }
 
 .drawer a {
-  height: 62px;
+  min-height: 54px;
+  padding: 0 4px;
   color: var(--text);
   text-decoration: none;
   display: grid;
-  grid-template-columns: auto 1fr auto;
+  grid-template-columns: 28px minmax(0, 1fr) 20px;
   align-items: center;
   gap: 12px;
-  font-size: 18px;
+  font-size: 16px;
+  font-weight: 850;
   border-bottom: 1px solid #f1f2f4;
 }
 
@@ -553,6 +579,58 @@ button {
   color: var(--smm-red);
 }
 
+.drawer a svg:last-child {
+  color: #a8b1c2;
+}
+
+.drawer-phone {
+  direction: ltr;
+  text-align: right;
+  font-size: 14px;
+}
+
+:root[data-theme="dark"] .drawer {
+  background: #102840;
+  color: #edf6ff;
+}
+
+:root[data-theme="dark"] .drawer-head {
+  border-bottom-color: rgba(255, 255, 255, 0.12);
+}
+
+:root[data-theme="dark"] .drawer-head h2,
+:root[data-theme="dark"] .drawer a {
+  color: #edf6ff;
+}
+
+:root[data-theme="dark"] .drawer-head p {
+  color: #b9cde7;
+}
+
+:root[data-theme="dark"] .drawer a {
+  border-bottom-color: rgba(255, 255, 255, 0.08);
+}
+
+@media (max-width: 380px) {
+  .drawer {
+    width: min(86vw, 320px);
+    padding-inline: 14px;
+  }
+
+  .drawer-head {
+    grid-template-columns: 40px 50px minmax(0, 1fr);
+  }
+
+  .drawer-logo {
+    width: 50px;
+    height: 50px;
+  }
+
+  .drawer a {
+    min-height: 52px;
+    font-size: 15px;
+  }
+}
 .contact-card {
   background: #fff;
   border-radius: 20px;
@@ -658,3 +736,4 @@ button {
     box-shadow: 0 0 0 1px var(--line), 0 24px 80px rgba(7, 26, 51, 0.18);
   }
 }
+
