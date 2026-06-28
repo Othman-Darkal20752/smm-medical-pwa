@@ -1,3 +1,4 @@
+﻿@import './styles/cart.css';
 /* SMM styles split by feature. Keep import order. */
 @import "./styles/base.css";
 @import "./styles/admin.css";
@@ -9,6 +10,7 @@
 @import "./styles/mobile-categories.css";
 @import "./styles/mobile-category-simplify.css";
 @import "./styles/mobile-header-theme.css";
+
 
 /* Stage 6J: mobile tap polish and compact spacing */
 * {
@@ -178,4 +180,6 @@ textarea:focus:not(:focus-visible) {
     padding: 9px 10px 10px !important;
   }
 }
+
+
 

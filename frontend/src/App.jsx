@@ -1410,29 +1410,6 @@ ${STORE_SHIPPING_TEXT}${
           onChange={handleCategoryChange}
         />
 
-        <section className="products-summary-card">
-          <div className="products-summary-main">
-            <span className="products-status-pill">
-              {activeCategory === "الكل" ? "كل التصنيفات" : activeCategory}
-            </span>
-
-            <h2>
-              {activeCategory === "الكل" ? "كل المنتجات" : activeCategory}
-            </h2>
-
-            <p>
-              {searchQuery.trim()
-                ? `نتائج البحث من قاعدة البيانات عن: "${searchQuery.trim()}"`
-                : "تصفح المنتجات من قاعدة البيانات حسب التصنيف أو استخدم البحث للوصول للمنتج المطلوب بسرعة."}
-            </p>
-          </div>
-
-          <div className="products-summary-meta">
-            <strong>{isInitialProductsLoading ? "..." : totalProductsCount}</strong>
-            <span>منتج مطابق</span>
-          </div>
-        </section>
-
         <section className="section-block products-list-section">
           <div className="products-toolbar">
             <div>
@@ -1497,22 +1474,6 @@ ${STORE_SHIPPING_TEXT}${
           <span>{config.label}</span>
           <h1>{config.title}</h1>
           <p>{config.description}</p>
-        </section>
-
-        <section className="products-summary-card featured-summary-card">
-          <div className="products-summary-main">
-            <span className="products-status-pill">{config.status}</span>
-            <h2>{config.title}</h2>
-            <p>
-              هذه القائمة مرتبطة مباشرة بقاعدة البيانات، ويتم تحديثها من لوحة
-              الإدارة حسب خصائص المنتج.
-            </p>
-          </div>
-
-          <div className="products-summary-meta">
-            <strong>{isInitialFeaturedLoading ? "..." : totalProductsCount}</strong>
-            <span>منتج مطابق</span>
-          </div>
         </section>
 
         <section className="section-block products-list-section">
