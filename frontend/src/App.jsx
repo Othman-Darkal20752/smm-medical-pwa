@@ -1262,33 +1262,6 @@ ${STORE_SHIPPING_TEXT}${
         onChange={handleCategoryChange}
       />
 
-      <section className="home-categories-panel">
-        <div className="section-title minimal-section-title">
-          <h2>التصنيفات الطبية</h2>
-          <button type="button" onClick={() => handlePageChange("products")}>
-            عرض الكل
-            <ChevronLeft size={19} />
-          </button>
-        </div>
-
-        <div className="home-category-grid">
-          {categoryOptions.slice(0, 10).map((category, index) => (
-            <button
-              type="button"
-              key={category}
-              className="home-category-card"
-              onClick={() => handleCategoryChange(category)}
-            >
-              <span>{index + 1}</span>
-              <strong>{category}</strong>
-              <small>
-                {productList.filter((product) => product.category === category).length} منتج
-              </small>
-            </button>
-          ))}
-        </div>
-      </section>
-
       <section className="section-block">
         <div className="section-title">
           <h2>عروضنا</h2>
