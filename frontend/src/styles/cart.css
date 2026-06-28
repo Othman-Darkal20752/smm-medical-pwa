@@ -222,3 +222,40 @@
 :root[data-theme="dark"] .checkout-note {
   color: #b9cde7;
 }
+
+
+
+/* Stable cart item visual placeholder */
+.cart-item-visual {
+  background:
+    radial-gradient(circle at 18% 18%, rgba(255, 255, 255, 0.16), transparent 28%),
+    linear-gradient(135deg, #2d95d6, #0f3a61) !important;
+}
+
+.cart-item-visual svg {
+  color: rgba(255, 255, 255, 0.34) !important;
+  stroke-width: 1.8;
+}
+
+.cart-item-visual:has(img),
+.cart-item-visual.has-product-image {
+  background: #ffffff !important;
+}
+
+.cart-item-visual img {
+  background: #ffffff !important;
+  object-fit: contain;
+}
+
+:root[data-theme="dark"] .cart-item-visual,
+:root[data-theme="light"] .cart-item-visual {
+  background:
+    radial-gradient(circle at 18% 18%, rgba(255, 255, 255, 0.16), transparent 28%),
+    linear-gradient(135deg, #2d95d6, #0f3a61) !important;
+}
+
+:root[data-theme="dark"] .cart-item-visual:has(img),
+:root[data-theme="light"] .cart-item-visual:has(img) {
+  background: #ffffff !important;
+}
+

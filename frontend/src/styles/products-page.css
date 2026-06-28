@@ -298,3 +298,9 @@
 :root[data-theme="dark"] .products-empty-card span {
   color: #b9cde7;
 }
+
+
+/* Production-safe products API note */
+.products-api-note {
+  display: none !important;
+}
