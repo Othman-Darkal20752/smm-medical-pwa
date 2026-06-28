@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   Bell,
   ChevronLeft,
@@ -12,9 +13,21 @@ import {
 import { storeInfo } from "../data/storeInfo";
 
 function DrawerMenu({ onClose, onNavigate, onInstallApp, showInstallAction }) {
+  const [isClosing, setIsClosing] = useState(false);
+
+  const closeWithAnimation = (afterClose) => {
+    if (isClosing) return;
+
+    setIsClosing(true);
+
+    window.setTimeout(() => {
+      onClose();
+      afterClose?.();
+    }, 220);
+  };
+
   const goTo = (id) => {
-    onClose();
-    onNavigate(id);
+    closeWithAnimation(() => onNavigate(id));
   };
 
   const handleInstallClick = (event) => {
@@ -29,17 +42,17 @@ function DrawerMenu({ onClose, onNavigate, onInstallApp, showInstallAction }) {
   const whatsappUrl = `https://wa.me/${storeInfo.whatsappRaw}`;
 
   return (
-    <div className="drawer-layer">
+    <div className={isClosing ? "drawer-layer is-closing" : "drawer-layer"}>
       <button
         className="drawer-backdrop"
         type="button"
-        onClick={onClose}
+        onClick={() => closeWithAnimation()}
         aria-label="إغلاق"
       />
 
       <aside className="drawer">
         <div className="drawer-head">
-          <button type="button" onClick={onClose} aria-label="إغلاق">
+          <button type="button" onClick={() => closeWithAnimation()} aria-label="إغلاق">
             <X size={24} />
           </button>
 
