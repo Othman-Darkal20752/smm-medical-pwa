@@ -1639,3 +1639,114 @@ a:active {
   }
 }
 
+
+
+/* Clean mobile contact page */
+@media (max-width: 899px) {
+  .contact-page-card,
+  .contact-info-grid .contact-card {
+    width: min(calc(100% - 24px), 430px);
+    margin-inline: auto;
+    padding: 16px;
+    display: block;
+    border-radius: 18px;
+    background: #123453;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-inline-start: 4px solid #d90416;
+    box-shadow: 0 12px 28px rgba(7, 26, 51, 0.16);
+    text-align: right;
+    overflow: hidden;
+  }
+
+  .contact-page-card {
+    margin-top: 12px;
+  }
+
+  .contact-page-card > svg {
+    display: none;
+  }
+
+  .contact-page-card > div,
+  .contact-info-grid .contact-card > div {
+    width: 100%;
+    min-width: 0;
+    display: block;
+  }
+
+  .contact-page-card h3,
+  .contact-info-grid .contact-card h3 {
+    margin: 0 0 8px;
+    color: #ffffff !important;
+    font-size: 18px;
+    font-weight: 950;
+    line-height: 1.4;
+  }
+
+  .contact-info-grid .contact-card h3 {
+    font-size: 17px;
+  }
+
+  .contact-page-card p,
+  .contact-info-grid .contact-card p {
+    margin: 0;
+    color: rgba(237, 246, 255, 0.78) !important;
+    font-size: 13px;
+    font-weight: 750;
+    line-height: 1.75;
+  }
+
+  .inline-phone {
+    display: inline-block;
+    margin-inline-start: 4px;
+    color: #ffffff;
+    font-weight: 950;
+    letter-spacing: 0.01em;
+    white-space: nowrap;
+  }
+
+  .contact-page-card a,
+  .contact-info-grid .contact-card a {
+    width: fit-content;
+    min-height: 38px;
+    margin-top: 12px;
+    padding: 0 18px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    background: #18a957;
+    color: #ffffff !important;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 950;
+    box-shadow: none;
+  }
+
+  .contact-info-grid {
+    width: 100%;
+    margin: 0;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .contact-info-grid .contact-card:nth-child(3) p {
+    width: auto;
+    padding: 0;
+    border-radius: 0;
+    background: transparent;
+    color: rgba(237, 246, 255, 0.78) !important;
+    font-weight: 850;
+  }
+}
+
+@media (min-width: 900px) {
+  .contact-page-card {
+    align-items: center;
+  }
+
+  .contact-info-grid .contact-card {
+    min-height: 170px;
+  }
+}
+
