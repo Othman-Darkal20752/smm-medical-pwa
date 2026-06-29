@@ -10,6 +10,7 @@
 @import "./styles/mobile-categories.css";
 @import "./styles/mobile-category-simplify.css";
 @import "./styles/mobile-header-theme.css";
+@import "./styles/mobile-product-cards.css";
 
 
 /* Stage 6J: mobile tap polish and compact spacing */
@@ -86,106 +87,6 @@ textarea:focus:not(:focus-visible) {
     transform: translateX(0);
   }
 }
-
-/* Stage 6K: compact mobile product cards */
-@media (max-width: 899px) {
-  .product-card,
-  .product-card.premium-product-card {
-    min-height: auto !important;
-    height: auto !important;
-    display: flex !important;
-    flex-direction: column !important;
-  }
-
-  .product-card .product-visual,
-  .product-card.premium-product-card .product-visual,
-  .product-visual {
-    height: 132px !important;
-    min-height: 132px !important;
-    max-height: 132px !important;
-    aspect-ratio: auto !important;
-  }
-
-  .product-card .product-card-content,
-  .product-card .product-info,
-  .product-card .product-details,
-  .product-card .premium-product-content,
-  .product-card .product-body {
-    min-height: auto !important;
-    height: auto !important;
-    padding: 10px 11px 11px !important;
-    display: flex !important;
-    flex-direction: column !important;
-    gap: 6px !important;
-    justify-content: flex-start !important;
-  }
-
-  .product-card h3,
-  .product-card .product-title {
-    min-height: 0 !important;
-    margin: 0 !important;
-    font-size: 0.82rem !important;
-    line-height: 1.45 !important;
-    display: -webkit-box !important;
-    -webkit-line-clamp: 2 !important;
-    -webkit-box-orient: vertical !important;
-    overflow: hidden !important;
-  }
-
-  .product-card .product-category,
-  .product-card .product-meta,
-  .product-card small {
-    margin: 0 !important;
-    font-size: 0.68rem !important;
-    line-height: 1.35 !important;
-  }
-
-  .product-card .product-price,
-  .product-card .product-prices,
-  .product-card .price-block,
-  .product-card .product-price-block {
-    margin-top: 6px !important;
-    margin-bottom: 6px !important;
-    gap: 2px !important;
-  }
-
-  .product-card .add-to-cart-button,
-  .product-card .cart-quantity-control,
-  .product-card .quantity-control {
-    margin-top: 4px !important;
-    min-height: 38px !important;
-    height: 38px !important;
-  }
-
-  .product-card .add-to-cart-button {
-    font-size: 0.82rem !important;
-    border-radius: 12px !important;
-  }
-}
-
-@media (max-width: 420px) {
-  .product-card .product-visual,
-  .product-card.premium-product-card .product-visual,
-  .product-visual {
-    height: 118px !important;
-    min-height: 118px !important;
-    max-height: 118px !important;
-  }
-
-  .product-card .product-card-content,
-  .product-card .product-info,
-  .product-card .product-details,
-  .product-card .premium-product-content,
-  .product-card .product-body {
-    padding: 9px 10px 10px !important;
-  }
-}
-
-
-
-
-
-
 
 /* Drawer close animation */
 @media (max-width: 899px) {
