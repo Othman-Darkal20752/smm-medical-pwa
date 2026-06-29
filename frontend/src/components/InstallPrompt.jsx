@@ -31,26 +31,27 @@ export default function InstallPrompt({
         type="button"
         className="install-prompt__close"
         onClick={onClose}
-        aria-label="تذكيري لاحقاً"
+        aria-label="إغلاق تذكير التثبيت"
       >
         ×
       </button>
 
-      <div className="install-prompt__icon">＋</div>
+      <div className="install-prompt__icon" aria-hidden="true">
+        SMM
+      </div>
 
       <div className="install-prompt__content">
-        <h3>ثبّت تطبيق SMM على جهازك</h3>
+        <h3>ثبّت تطبيق مول صحنايا الطبي</h3>
 
         {isIOS ? (
           <p>
             من Safari اضغط زر المشاركة ثم اختر
             <strong> إضافة إلى الشاشة الرئيسية </strong>
-            لاستخدام الكتالوج كتطبيق.
+            لاستخدام الموقع كتطبيق.
           </p>
         ) : canInstall ? (
           <p>
-            ثبّت الكتالوج على الشاشة الرئيسية لتفتحه بسرعة مثل التطبيق بدون
-            الحاجة للبحث عن الموقع كل مرة.
+            ثبّت التطبيق لتصفح أسرع والوصول للمنتجات مباشرة من شاشة جوالك.
           </p>
         ) : (
           <p>
@@ -61,13 +62,15 @@ export default function InstallPrompt({
         )}
       </div>
 
-      <button
-        type="button"
-        className="install-prompt__button"
-        onClick={handlePrimaryAction}
-      >
-        {canInstall ? "تثبيت" : "حسناً"}
-      </button>
+      {canInstall && (
+        <button
+          type="button"
+          className="install-prompt__button"
+          onClick={handlePrimaryAction}
+        >
+          تثبيت
+        </button>
+      )}
     </div>
   );
 }

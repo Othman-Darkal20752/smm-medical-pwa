@@ -263,6 +263,24 @@ function upsertProductsById(products, nextProducts) {
 }
 
 
+const INSTALL_DISMISSED_SESSION_KEY = "smm-install-bubble-dismissed-session";
+
+function isInstallBubbleDismissedThisSession() {
+  try {
+    return sessionStorage.getItem(INSTALL_DISMISSED_SESSION_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
+function dismissInstallBubbleForSession() {
+  try {
+    sessionStorage.setItem(INSTALL_DISMISSED_SESSION_KEY, "1");
+  } catch {
+    // Ignore storage errors.
+  }
+}
+
 function App() {
   const [currentPath, setCurrentPath] = useState(() => window.location.pathname);
 
@@ -468,6 +486,18 @@ function App() {
 
     cleanupOldInstallStorage();
 
+    if (
+      !isStandaloneMode() &&
+      isInstallSupportedDevice() &&
+      !isInstallBubbleDismissedThisSession()
+    ) {
+      window.setTimeout(() => {
+        if (!isStandaloneMode() && !isInstallBubbleDismissedThisSession()) {
+          setInstallHelpOpen(true);
+        }
+      }, 1200);
+    }
+
     const handleBeforeInstallPrompt = (event) => {
       event.preventDefault();
 
@@ -476,6 +506,10 @@ function App() {
       }
 
       setInstallEvent(event);
+
+      if (!isInstallBubbleDismissedThisSession()) {
+        setInstallHelpOpen(true);
+      }
     };
 
     const handleAppInstalled = () => {
@@ -1112,6 +1146,11 @@ ${STORE_SHIPPING_TEXT}${
       setInstallEvent(null);
       setInstallHelpOpen(true);
     }
+  };
+
+  const handleInstallPromptClose = () => {
+    dismissInstallBubbleForSession();
+    setInstallHelpOpen(false);
   };
 
   const handlePageChange = (page) => {
@@ -1868,8 +1907,10 @@ if (currentPath.startsWith("/admin") || currentPath.startsWith("/dashboard")) {
       )}
 
       <InstallPrompt
-        isOpen={installHelpOpen}
-        onClose={() => setInstallHelpOpen(false)}
+        isOpen={installHelpOpen && !isStandaloneApp}
+        canInstall={Boolean(installEvent)}
+        onInstall={handleInstallApp}
+        onClose={handleInstallPromptClose}
       />
     </div>
   );
