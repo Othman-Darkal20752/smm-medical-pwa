@@ -98,3 +98,186 @@
     height: 140px;
   }
 }
+
+/* Final professional checkout payment design */
+@media (max-width: 899px) {
+  .checkout-card {
+    width: min(calc(100% - 24px), 430px);
+    margin-inline: auto;
+    margin-bottom: 132px !important;
+    padding: 15px 14px 16px;
+    display: grid;
+    gap: 14px;
+    border-radius: 20px;
+    background:
+      radial-gradient(circle at top right, rgba(45, 149, 214, 0.16), transparent 36%),
+      linear-gradient(180deg, #153150, #102840) !important;
+    border: 1px solid rgba(255, 255, 255, 0.09) !important;
+    box-shadow: 0 16px 36px rgba(7, 26, 51, 0.22);
+    color: #edf6ff;
+  }
+
+  .checkout-row {
+    padding: 0 2px 4px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .checkout-row span {
+    color: #edf6ff !important;
+    font-size: 13px;
+    font-weight: 900;
+  }
+
+  .checkout-row strong {
+    color: #ff4056 !important;
+    font-size: 17px;
+    font-weight: 950;
+  }
+
+  .checkout-note {
+    margin: -4px 0 0;
+    color: rgba(237, 246, 255, 0.72) !important;
+    font-size: 11px;
+    line-height: 1.7;
+  }
+
+  .payment-box {
+    display: grid;
+    gap: 11px;
+  }
+
+  .payment-title {
+    margin-top: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 7px;
+    color: #edf6ff !important;
+  }
+
+  .payment-title h3 {
+    margin: 0;
+    color: #edf6ff !important;
+    font-size: 17px;
+    font-weight: 950;
+  }
+
+  .payment-title svg {
+    width: 17px;
+    height: 17px;
+    color: rgba(237, 246, 255, 0.54);
+  }
+
+  .payment-options {
+    display: grid;
+    gap: 8px;
+  }
+
+  .checkout-card .payment-options button {
+    position: relative;
+    width: 100%;
+    min-height: 56px;
+    padding: 10px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    text-align: right;
+    border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.11) !important;
+    background: rgba(255, 255, 255, 0.055) !important;
+    color: #edf6ff !important;
+    box-shadow: none !important;
+  }
+
+  .checkout-card .payment-options button.active {
+    border-color: rgba(255, 64, 86, 0.62) !important;
+    background:
+      linear-gradient(90deg, rgba(217, 4, 22, 0.14), rgba(255, 255, 255, 0.055)) !important;
+    box-shadow: inset -4px 0 0 #d90416 !important;
+  }
+
+  .payment-option-content {
+    width: 100%;
+    min-width: 0;
+    display: grid;
+    gap: 3px;
+  }
+
+  .payment-option-content strong {
+    color: #ffffff !important;
+    font-size: 13px;
+    font-weight: 950;
+    line-height: 1.35;
+  }
+
+  .payment-option-content small {
+    color: rgba(237, 246, 255, 0.7) !important;
+    font-size: 10.5px;
+    font-weight: 750;
+    line-height: 1.65;
+  }
+
+  .sham-cash-card {
+    direction: ltr;
+    display: grid;
+    grid-template-columns: 88px minmax(0, 1fr);
+    align-items: center;
+    gap: 12px;
+    padding: 10px;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.055) !important;
+    border: 1px solid rgba(255, 255, 255, 0.11);
+  }
+
+  .sham-cash-card img {
+    width: 88px;
+    height: 88px;
+    padding: 6px;
+    display: block;
+    border-radius: 12px;
+    background: #ffffff !important;
+    object-fit: contain;
+  }
+
+  .sham-cash-copy {
+    direction: rtl;
+    min-width: 0;
+    text-align: right;
+  }
+
+  .sham-cash-copy h3 {
+    margin: 0 0 5px;
+    color: #ffffff !important;
+    font-size: 13px;
+    font-weight: 950;
+    line-height: 1.35;
+  }
+
+  .sham-cash-copy p {
+    margin: 0;
+    color: rgba(237, 246, 255, 0.72) !important;
+    font-size: 10.5px;
+    font-weight: 750;
+    line-height: 1.65;
+  }
+
+  .whatsapp-order-button {
+    width: 100%;
+    min-height: 44px;
+    margin-top: 2px;
+    margin-bottom: 4px;
+    border-radius: 14px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    background: #18a957 !important;
+    color: #ffffff !important;
+    font-size: 13px;
+    font-weight: 950;
+    box-shadow: none !important;
+  }
+}
