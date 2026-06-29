@@ -2021,3 +2021,41 @@ a:active {
   }
 }
 
+
+
+
+/* Final product card image containment fix */
+@media (max-width: 899px) {
+  .product-card.premium-product-card .product-visual.has-product-image,
+  .product-card.premium-product-card .product-visual:has(img) {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    overflow: hidden !important;
+    padding: 8px !important;
+    background: #ffffff !important;
+  }
+
+  .product-card.premium-product-card .product-visual.has-product-image img,
+  .product-card.premium-product-card .product-visual:has(img) img {
+    width: 100% !important;
+    height: 100% !important;
+    max-width: 86% !important;
+    max-height: 86% !important;
+    object-fit: contain !important;
+    object-position: center center !important;
+    display: block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    filter: none !important;
+    mix-blend-mode: normal !important;
+    transform: none !important;
+    background: transparent !important;
+  }
+
+  .product-card.premium-product-card .product-visual.no-product-image,
+  .product-card.premium-product-card .product-visual:not(:has(img)) {
+    padding: 0 !important;
+  }
+}
+
