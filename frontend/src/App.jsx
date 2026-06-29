@@ -241,6 +241,47 @@ function isInstallSupportedDevice() {
   );
 }
 
+const INSTALL_COMPLETED_KEY = "smm-install-completed";
+
+function isIOSDevice() {
+  return /iphone|ipad|ipod/i.test(window.navigator.userAgent);
+}
+
+function hasCompletedInstall() {
+  try {
+    return localStorage.getItem(INSTALL_COMPLETED_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
+function rememberCompletedInstall() {
+  try {
+    localStorage.setItem(INSTALL_COMPLETED_KEY, "1");
+  } catch {
+    // Ignore storage errors.
+  }
+}
+
+function setPwaManifestForPath(pathname = window.location.pathname) {
+  const manifestLink = document.querySelector('link[rel="manifest"]');
+
+  if (!manifestLink) return;
+
+  const isAdminPath =
+    pathname.startsWith("/admin") || pathname.startsWith("/dashboard");
+
+  const nextHref = isAdminPath
+    ? "/admin-manifest.webmanifest"
+    : "/manifest.webmanifest";
+
+  if (manifestLink.getAttribute("href") !== nextHref) {
+    manifestLink.setAttribute("href", nextHref);
+  }
+}
+
+setPwaManifestForPath();
+
 function upsertProductById(products, product) {
   if (!product?.id) return products;
 
@@ -340,7 +381,7 @@ function App() {
   const [installEvent, setInstallEvent] = useState(null);
   const [installHelpOpen, setInstallHelpOpen] = useState(false);
   const [isStandaloneApp, setIsStandaloneApp] = useState(() =>
-    isStandaloneMode()
+    isStandaloneMode() || hasCompletedInstall()
   );
 
   const offerRowRef = useRef(null);
@@ -477,10 +518,13 @@ function App() {
   }, []);
 
   useEffect(() => {
+    setPwaManifestForPath(currentPath);
+  }, [currentPath]);
+
+  useEffect(() => {
     const cleanupOldInstallStorage = () => {
       localStorage.removeItem("smm-install-dismissed");
       localStorage.removeItem("smm-install-dismissed-until");
-      localStorage.removeItem("smm-install-completed");
       sessionStorage.removeItem("smm-install-dismissed-session");
     };
 
@@ -489,10 +533,16 @@ function App() {
     if (
       !isStandaloneMode() &&
       isInstallSupportedDevice() &&
+      isIOSDevice() &&
+      !hasCompletedInstall() &&
       !isInstallBubbleDismissedThisSession()
     ) {
       window.setTimeout(() => {
-        if (!isStandaloneMode() && !isInstallBubbleDismissedThisSession()) {
+        if (
+          !isStandaloneMode() &&
+          !hasCompletedInstall() &&
+          !isInstallBubbleDismissedThisSession()
+        ) {
           setInstallHelpOpen(true);
         }
       }, 1200);
@@ -507,12 +557,13 @@ function App() {
 
       setInstallEvent(event);
 
-      if (!isInstallBubbleDismissedThisSession()) {
+      if (!hasCompletedInstall() && !isInstallBubbleDismissedThisSession()) {
         setInstallHelpOpen(true);
       }
     };
 
     const handleAppInstalled = () => {
+      rememberCompletedInstall();
       setInstallEvent(null);
       setInstallHelpOpen(false);
       setIsStandaloneApp(true);
@@ -521,7 +572,7 @@ function App() {
     const displayModeQuery = window.matchMedia("(display-mode: standalone)");
 
     const handleDisplayModeChange = () => {
-      setIsStandaloneApp(isStandaloneMode());
+      setIsStandaloneApp(isStandaloneMode() || hasCompletedInstall());
     };
 
     window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
@@ -1118,7 +1169,7 @@ ${STORE_SHIPPING_TEXT}${
   };
 
   const handleInstallApp = async () => {
-    if (isStandaloneMode() || isStandaloneApp) {
+    if (isStandaloneMode() || isStandaloneApp || hasCompletedInstall()) {
       setInstallHelpOpen(false);
       return;
     }
@@ -1136,6 +1187,7 @@ ${STORE_SHIPPING_TEXT}${
       setInstallEvent(null);
 
       if (result.outcome === "accepted") {
+        rememberCompletedInstall();
         setIsStandaloneApp(true);
         setInstallHelpOpen(false);
         return;
@@ -1902,12 +1954,12 @@ if (currentPath.startsWith("/admin") || currentPath.startsWith("/dashboard")) {
           onClose={() => setDrawerOpen(false)}
           onNavigate={handleNavClick}
           onInstallApp={handleInstallApp}
-          showInstallAction={!isStandaloneApp && isInstallSupportedDevice()}
+          showInstallAction={!isStandaloneApp && !hasCompletedInstall() && isInstallSupportedDevice()}
         />
       )}
 
       <InstallPrompt
-        isOpen={installHelpOpen && !isStandaloneApp}
+        isOpen={installHelpOpen && !isStandaloneApp && !hasCompletedInstall()}
         canInstall={Boolean(installEvent)}
         onInstall={handleInstallApp}
         onClose={handleInstallPromptClose}
